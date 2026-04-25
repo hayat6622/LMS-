@@ -1,0 +1,89 @@
+:root {
+  --primary-dark: #0D3B3F;
+  --primary-teal: #135058;
+  --accent-gold: #D4AF37;
+  --accent-light-gold: #E6C27A;
+  --bg-beige: #F4EFE6;
+  --success-green: #4ADE80;
+}
+
+body {
+  background-color: var(--bg-beige);
+  color: var(--primary-dark);
+  font-family: 'Inter', sans-serif;
+}
+
+/* RTL Body Font Override (applied via JS) */
+[dir="rtl"] body,
+html[dir="rtl"] body {
+  font-family: 'Noto Nastaliq Urdu', 'Inter', sans-serif;
+  line-height: 2.2;
+}
+
+/* RTL-specific adjustments */
+[dir="rtl"] .tracking-wider,
+[dir="rtl"] .tracking-widest,
+[dir="rtl"] .tracking-\[0\.2em\],
+[dir="rtl"] .tracking-\[0\.3em\] {
+  letter-spacing: normal;
+}
+
+/* Glassmorphism Classes */
+.glass-card {
+  background: rgba(255, 255, 255, 0.4);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  border-radius: 1.5rem;
+  box-shadow: 0 8px 32px rgba(13, 59, 63, 0.1);
+  transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+}
+
+.glass-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 40px rgba(13, 59, 63, 0.15);
+}
+
+/* Action Tile Gradient */
+.action-tile {
+  background: linear-gradient(135deg, var(--primary-teal), var(--primary-dark));
+  border: 1px solid rgba(212, 175, 55, 0.3);
+  border-radius: 1.5rem;
+  box-shadow: 0 10px 20px rgba(13, 59, 63, 0.3);
+  overflow: hidden;
+  position: relative;
+  transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+}
+
+.action-tile:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 15px 30px rgba(13, 59, 63, 0.4);
+}
+
+.action-tile-bg-svg {
+  position: absolute;
+  top: -20px;
+  right: -20px;
+  width: 120px;
+  height: 120px;
+  opacity: 0.1;
+  pointer-events: none;
+}
+
+/* RTL: flip action tile bg svg */
+[dir="rtl"] .action-tile-bg-svg {
+  right: auto;
+  left: -20px;
+}
+
+/* Base Styles */
+.text-gold { color: var(--accent-gold); }
+.text-light-gold { color: var(--accent-light-gold); }
+.text-beige { color: var(--bg-beige); }
+.bg-primary-dark { background-color: var(--primary-dark); }
+.border-gold-opacity { border-color: rgba(212, 175, 55, 0.2); }
+
+/* Header logo area text in RTL */
+[dir="rtl"] header .text-2xl {
+  font-family: 'Noto Nastaliq Urdu', sans-serif;
+}

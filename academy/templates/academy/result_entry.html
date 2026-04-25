@@ -1,0 +1,151 @@
+{% extends 'academy/base.html' %}
+{% load static %}
+{% load academy_extras %}
+
+{% block title %}Bulk Result Entry | Jamia Ahsan ul Uloom{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto px-6 py-8">
+    <div class="mb-8 flex flex-col md:flex-row md:items-end justify-between gap-6">
+        <div>
+            <h1 class="text-primary-dark text-3xl font-bold" data-en="Bulk Result Entry" data-ur="رزلٹ انٹری">Bulk Result Entry</h1>
+            <p class="text-primary-dark/60 mt-1" data-en="Enter marks for all students in a specific class." data-ur="کسی خاص درجے کے تمام طلباء کے نمبر درج کریں۔">Enter marks for all students in a specific class.</p>
+        </div>
+        
+        <!-- Selection Form -->
+        <form method="get" class="flex flex-wrap gap-4 bg-white/50 p-4 rounded-2xl border border-primary-dark/10 shadow-sm">
+            <div class="flex flex-col gap-1">
+                <label class="text-xs font-bold text-primary-dark/60 ml-2" data-en="Year" data-ur="سال">Year</label>
+                <select name="year" class="bg-white border border-primary-dark/20 rounded-xl px-4 py-2 text-primary-dark font-medium">
+                    <option value="2024" {% if year == '2024' %}selected{% endif %}>2024</option>
+                    <option value="2023" {% if year == '2023' %}selected{% endif %}>2023</option>
+                </select>
+            </div>
+            <div class="flex flex-col gap-1" id="course-filter-group">
+                <label class="text-xs font-bold text-primary-dark/60 ml-2" data-en="Course" data-ur="شعبہ">Course</label>
+                <select name="course" id="course-select" class="bg-white border border-primary-dark/20 rounded-xl px-4 py-2 text-primary-dark font-medium">
+                    <option value="">---</option>
+                    {% for val, label in course_choices %}
+                    <option value="{{ val }}" {% if course == val %}selected{% endif %}>{{ label }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="flex flex-col gap-1" id="class-filter-group">
+                <label class="text-xs font-bold text-primary-dark/60 ml-2" data-en="Class" data-ur="درجہ">Class</label>
+                <select name="class_name" id="class-select" class="bg-white border border-primary-dark/20 rounded-xl px-4 py-2 text-primary-dark font-medium">
+                    <option value="">---</option>
+                    {% for val, label in class_choices %}
+                    <option value="{{ val }}" {% if class_name == val %}selected{% endif %}>{{ label }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="flex gap-2 self-end">
+                <button type="submit" class="bg-primary-dark text-white px-6 py-2 rounded-xl font-bold hover:bg-black transition">
+                    <span data-en="Filter" data-ur="تلاش کریں">Filter</span>
+                </button>
+                <a href="{% url 'academy:result_bulk_entry' %}" class="bg-white border border-primary-dark/20 text-primary-dark/60 px-4 py-2 rounded-xl font-bold hover:bg-white hover:text-primary-dark transition flex items-center justify-center">
+                    <span data-en="Reset" data-ur="دوبارہ شروع">Reset</span>
+                </a>
+            </div>
+        </form>
+    </div>
+
+    {% block extra_js %}
+    <script>
+        (function() {
+            const courseSelect = document.getElementById('course-select');
+            const classGroup = document.getElementById('class-filter-group');
+
+            function toggleClassVisibility() {
+                const val = courseSelect.value;
+                if (val === 'شعبہ بنین' || val === 'شعبہ حفظ و ناظرہ') {
+                    classGroup.style.display = 'none';
+                    document.getElementById('class-select').value = '';
+                } else {
+                    classGroup.style.display = 'flex';
+                }
+            }
+
+            courseSelect.addEventListener('change', toggleClassVisibility);
+            toggleClassVisibility();
+        })();
+    </script>
+    {% endblock %}
+
+    {% if not course or not class_name and course == 'شعبہ کتب' %}
+    <div class="glass-card p-12 text-center">
+        <div class="w-16 h-16 bg-primary-dark/5 rounded-full flex items-center justify-center mx-auto mb-4">
+            <svg class="w-8 h-8 text-primary-dark/30" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
+            </svg>
+        </div>
+        <h2 class="text-xl font-bold text-primary-dark" data-en="Please Select Details" data-ur="براہ کرم تفصیلات منتخب کریں۔">Please Select Details</h2>
+        <p class="text-primary-dark/60" data-en="Select a year, course, and class to start entering marks." data-ur="نمبر درج کرنے کے لیے سال، شعبہ اور درجہ منتخب کریں۔">Select a year, course, and class to start entering marks.</p>
+    </div>
+    {% elif not subjects %}
+    <div class="glass-card p-12 text-center">
+        <h2 class="text-xl font-bold text-red-600" data-en="No Subjects Found" data-ur="کوئی مضمون نہیں ملا">No Subjects Found</h2>
+        <p class="text-primary-dark/60 mb-6" data-en="You haven't added any subjects for this class yet." data-ur="آپ نے ابھی تک اس درجے کے لیے کوئی مضمون شامل نہیں کیا ہے۔">You haven't added any subjects for this class yet.</p>
+        <a href="{% url 'academy:subjects_manage' %}" class="bg-primary-dark text-white px-6 py-3 rounded-xl font-bold hover:bg-black transition">
+            <span data-en="Go to Subject Management" data-ur="مضامین ترتیب دیں">Go to Subject Management</span>
+        </a>
+    </div>
+    {% else %}
+    <form method="post">
+        {% csrf_token %}
+        <div class="glass-card overflow-x-auto">
+            <table class="w-full text-left border-collapse min-w-[800px]">
+                <thead>
+                    <tr class="bg-primary-dark text-white">
+                        <th class="p-4 w-48 sticky left-0 bg-primary-dark z-10" data-en="Student" data-ur="طالب علم">Student</th>
+                        {% for subject in subjects %}
+                        <th class="p-4 text-center">
+                            {{ subject.name }}<br>
+                            <span class="text-[10px] text-white/60">Max: {{ subject.total_marks }}</span>
+                        </th>
+                        {% endfor %}
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-primary-dark/5 bg-white">
+                    {% for student in students %}
+                    <tr class="hover:bg-primary-light/5 transition duration-200">
+                        <td class="p-4 font-bold text-primary-dark sticky left-0 bg-white shadow-[2px_0_5px_rgba(0,0,0,0.05)] z-10">
+                            {{ student.name }}<br>
+                            <span class="text-xs text-primary-dark/50">{{ student.student_id }}</span>
+                        </td>
+                        {% for subject in subjects %}
+                        <td class="p-4">
+                            {% with student_id=student.student_id results=current_results %}
+                                {% with student_marks=results|get_item:student_id %}
+                                    <input type="number" 
+                                           name="marks_{{ student.student_id }}_{{ subject.id }}" 
+                                           value="{{ student_marks|get_item:subject.name|default:0 }}"
+                                           max="{{ subject.total_marks }}"
+                                           step="1"
+                                           class="w-full bg-primary-light/5 border border-primary-dark/10 rounded-lg px-2 py-2 text-center text-primary-dark font-bold focus:bg-white focus:border-accent-gold transition outline-none">
+                                {% endwith %}
+                            {% endwith %}
+                        </td>
+                        {% endfor %}
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="{{ subjects.count|add:1 }}" class="p-8 text-center text-primary-dark/50" data-en="No students found in this class." data-ur="اس درجے میں کوئی طالب علم نہیں ہے۔">No students found in this class.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <div class="mt-8 flex justify-end">
+            <button type="submit" class="bg-accent-gold hover:bg-accent-light text-primary-dark font-bold py-4 px-12 rounded-2xl transition shadow-xl text-lg flex items-center gap-3 cursor-pointer">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                </svg>
+                <span data-en="Save All Results" data-ur="تمام رزلٹ محفوظ کریں">Save All Results</span>
+            </button>
+        </div>
+    </form>
+    {% endif %}
+</div>
+{% endblock %}

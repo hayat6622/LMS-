@@ -1,0 +1,120 @@
+{% extends 'academy/base.html' %}
+{% load static %}
+
+{% block title %}Directory | Jamia Ahsan ul uloom Mardan LMS{% endblock %}
+
+{% block content %}
+<div class="max-w-[1200px] mx-auto px-6 py-8">
+
+    <div class="mb-6 flex gap-4 no-print">
+        <a href="{% url 'academy:dashboard' %}"
+            class="bg-white/50 border border-primary-dark/20 text-primary-dark px-4 py-2 rounded-xl hover:bg-white transition flex items-center gap-2 font-semibold shadow-sm">
+            <span class="rtl:hidden">&larr;</span><span class="ltr:hidden">&rarr;</span> <span data-en="Back to Dashboard" data-ur="ڈیش بورڈ پر واپس">Back to Dashboard</span>
+        </a>
+    </div>
+
+    <!-- Header & Search -->
+    <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
+        <div>
+            <h1 class="text-primary-dark text-3xl font-bold" data-en="Student Directory" data-ur="طلباء ڈائریکٹری">Student Directory</h1>
+            <p class="text-primary-dark/60 mt-1" data-en="Manage and view all enrolled scholars." data-ur="تمام داخل شدہ طلباء کا نظم اور مشاہدہ کریں۔">Manage and view all enrolled scholars.</p>
+        </div>
+
+        <form method="GET" class="flex gap-4 items-center">
+            <!-- Search -->
+            <div class="relative w-64 md:w-80">
+                <input type="text" name="q" value="{{ query }}" data-placeholder-en="Search by name or ID..." data-placeholder-ur="نام یا آئی ڈی سے تلاش کریں..." placeholder="Search by name or ID..."
+                    class="w-full ltr:pl-10 ltr:pr-4 rtl:pr-10 rtl:pl-4 py-2 border border-primary-dark/20 rounded-xl bg-white/50 focus:outline-none focus:ring-2 focus:ring-accent-gold/50">
+                <svg class="w-5 h-5 text-primary-dark/40 absolute ltr:left-3 rtl:right-3 top-2.5" fill="none" stroke="currentColor"
+                    viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                </svg>
+            </div>
+
+            <input type="hidden" name="course" value="{{ course_filter }}">
+            <button type="submit" class="hidden">Search</button>
+        </form>
+    </div>
+
+    <!-- Filter Buttons -->
+    <div class="flex gap-4 mb-8 overflow-x-auto pb-2 scrollbar-none">
+        <a href="?course=All{% if query %}&q={{ query }}{% endif %}"
+            class="px-5 py-2.5 rounded-xl text-sm font-bold whitespace-nowrap transition-all shadow-sm {% if course_filter == 'All' or not course_filter %}bg-primary-dark text-beige{% else %}bg-white/50 text-primary-dark hover:bg-white border border-primary-dark/10{% endif %}">
+            <span data-en="All Courses" data-ur="تمام شعبہ جات">All Courses</span> ({{ total_count }})
+        </a>
+        <a href="?course=شعبہ حفظ و ناظرہ{% if query %}&q={{ query }}{% endif %}"
+            class="px-5 py-2.5 rounded-xl text-sm font-bold whitespace-nowrap transition-all shadow-sm {% if course_filter == 'شعبہ حفظ و ناظرہ' %}bg-primary-dark text-beige{% else %}bg-white/50 text-primary-dark hover:bg-white border border-primary-dark/10{% endif %}">
+            <span data-en="Hifz & Nazra Dept." data-ur="شعبہ حفظ و ناظرہ">Hifz & Nazra Dept.</span> ({{ hifz_count }})
+        </a>
+        <a href="?course=شعبہ کتب{% if query %}&q={{ query }}{% endif %}"
+            class="px-5 py-2.5 rounded-xl text-sm font-bold whitespace-nowrap transition-all shadow-sm {% if course_filter == 'شعبہ کتب' %}bg-primary-dark text-beige{% else %}bg-white/50 text-primary-dark hover:bg-white border border-primary-dark/10{% endif %}">
+            <span data-en="Kutub Dept." data-ur="شعبہ کتب">Kutub Dept.</span> ({{ alim_count }})
+        </a>
+        <a href="?course=شعبہ بنین{% if query %}&q={{ query }}{% endif %}"
+            class="px-5 py-2.5 rounded-xl text-sm font-bold whitespace-nowrap transition-all shadow-sm {% if course_filter == 'شعبہ بنین' %}bg-primary-dark text-beige{% else %}bg-white/50 text-primary-dark hover:bg-white border border-primary-dark/10{% endif %}">
+            <span data-en="Baneen Dept." data-ur="شعبہ بنین">Baneen Dept.</span> ({{ basic_count }})
+        </a>
+    </div>
+
+
+    <!-- Student Grid -->
+    {% if students %}
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {% for student in students %}
+        <a href="{% url 'academy:student_profile' student.student_id %}" class="block group">
+            <div class="glass-card p-6 h-full flex flex-col justify-between">
+                <div class="flex gap-4 items-start mb-4">
+                    <!-- Avatar -->
+                    <div
+                        class="w-14 h-14 rounded-full bg-primary-dark text-accent-light flex items-center justify-center text-xl font-bold uppercase shrink-0">
+                        {{ student.name.0 }}
+                    </div>
+                    <!-- Info -->
+                    <div>
+                        <h3 class="font-bold text-lg text-primary-dark group-hover:text-accent-gold transition-colors leading-tight" 
+                            data-en="{{ student.name_en|default:student.name }}" 
+                            data-ur="{{ student.name }}">
+                            {{ student.name_en|default:student.name }}</h3>
+                        <div class="mt-2 inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-primary-dark/5 text-primary-dark/70 uppercase tracking-tighter border border-primary-dark/10">
+                            ID: {{ student.student_id }}
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mt-4 pt-4 border-t border-primary-dark/10 grid grid-cols-2 gap-2 text-sm">
+                    <div>
+                        <span class="text-primary-dark/50 block text-xs" data-en="Department" data-ur="شعبہ">Department</span>
+                        <!-- Course value: mapped to English in EN mode, kept Urdu in UR mode -->
+                        {% if student.course == 'شعبہ حفظ و ناظرہ' %}
+                            <span class="font-semibold text-primary-dark" data-en="Hifz & Nazra" data-ur="شعبہ حفظ و ناظرہ">Hifz & Nazra</span>
+                        {% elif student.course == 'شعبہ کتب' %}
+                            <span class="font-semibold text-primary-dark" data-en="Kutub" data-ur="شعبہ کتب">Kutub</span>
+                        {% elif student.course == 'شعبہ بنین' %}
+                            <span class="font-semibold text-primary-dark" data-en="Baneen" data-ur="شعبہ بنین">Baneen</span>
+                        {% else %}
+                            <span class="font-semibold text-primary-dark">{{ student.course }}</span>
+                        {% endif %}
+                    </div>
+                    <div>
+                        <span class="text-primary-dark/50 block text-xs" data-en="Attendance" data-ur="حاضری">Attendance</span>
+                        <span class="font-semibold text-success">{{ student.attendance_score }}%</span>
+                    </div>
+                </div>
+            </div>
+        </a>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="flex flex-col items-center justify-center p-12 glass-card">
+        <svg class="w-16 h-16 text-primary-dark/20 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z">
+            </path>
+        </svg>
+        <p class="text-primary-dark/60 font-semibold text-lg" data-en="No scholars found matching your criteria." data-ur="آپ کے معیار سے مماثل کوئی طالب علم نہیں ملا۔">No scholars found matching your criteria.</p>
+    </div>
+    {% endif %}
+
+</div>
+{% endblock %}

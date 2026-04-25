@@ -1,0 +1,77 @@
+{% extends 'academy/base.html' %}
+{% load static %}
+
+{% block title %}Staff Management | Jamia Ahsan ul uloom Mardan LMS{% endblock %}
+
+{% block content %}
+<div class="max-w-[1200px] mx-auto px-6 py-8">
+
+    <div class="mb-6 flex gap-4 no-print">
+        <a href="{% url 'academy:dashboard' %}"
+            class="bg-white/50 border border-primary-dark/20 text-primary-dark px-4 py-2 rounded-xl hover:bg-white transition flex items-center gap-2 font-semibold shadow-sm">
+            <span class="rtl:hidden">&larr;</span><span class="ltr:hidden">&rarr;</span> <span data-en="Back to Dashboard" data-ur="ڈیش بورڈ پر واپس">Back to Dashboard</span>
+        </a>
+    </div>
+
+    <div class="flex justify-between items-end mb-8">
+        <div>
+            <h1 class="text-primary-dark text-3xl font-bold" data-en="Staff Roster" data-ur="عملے کی فہرست">Staff Roster</h1>
+            <p class="text-primary-dark/60 mt-1" data-en="Manage personnel and administration roles." data-ur="عملے اور انتظامی کرداروں کا نظم کریں۔">Manage personnel and administration roles.</p>
+        </div>
+        <a href="{% url 'academy:staff_create' %}"
+            class="bg-primary-dark text-beige px-4 py-2 flex items-center gap-2 rounded-xl shadow hover:bg-primary-teal transition cursor-pointer">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+            </svg>
+            <span data-en="Add Member" data-ur="رکن شامل کریں">Add Member</span>
+        </a>
+    </div>
+
+    <!-- Staff Grid -->
+    {% if staff %}
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {% for member in staff %}
+        <div class="glass-card p-6 flex flex-col gap-4 group">
+            <div class="flex items-center gap-4">
+                <div class="w-12 h-12 bg-accent-gold text-primary-dark font-bold rounded-xl flex items-center justify-center text-xl shadow-sm group-hover:bg-primary-dark group-hover:text-accent-gold transition-colors">
+                    {{ member.name.0 }}
+                </div>
+                <div>
+                    <h3 class="font-bold text-primary-dark">{{ member.name }}</h3>
+                    <div class="text-xs text-primary-dark/60 font-semibold tracking-wider uppercase">{{ member.role }}</div>
+                </div>
+            </div>
+            <div class="grid grid-cols-2 gap-2 text-sm border-t border-primary-dark/10 pt-3">
+                <div>
+                    <span class="text-primary-dark/50 block text-xs" data-en="Contact" data-ur="رابطہ">Contact</span>
+                    <span class="font-semibold text-primary-dark">{{ member.contact_number }}</span>
+                </div>
+                <div>
+                    <span class="text-primary-dark/50 block text-xs" data-en="Salary" data-ur="تنخواہ">تنخواہ</span>
+                    <span class="font-semibold text-primary-dark">{{ member.salary|default:"—" }}</span>
+                </div>
+                <div>
+                    <span class="text-primary-dark/50 block text-xs" data-en="Class" data-ur="کلاس">کلاس</span>
+                    <span class="font-semibold text-primary-dark">{{ member.assigned_class|default:"—" }}</span>
+                </div>
+                <div>
+                    <span class="text-primary-dark/50 block text-xs" data-en="Duration" data-ur="مدت">مدت</span>
+                    <span class="font-semibold text-primary-dark">{{ member.duration|default:"—" }}</span>
+                </div>
+                {% if member.address %}
+                <div class="col-span-2">
+                    <span class="text-primary-dark/50 block text-xs" data-en="Address" data-ur="پتہ">پتہ</span>
+                    <span class="font-semibold text-primary-dark">{{ member.address }}</span>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="glass-card p-8 text-center text-primary-dark/60 font-semibold" data-en="No staff members registered in the database yet." data-ur="ابھی تک ڈیٹابیس میں کوئی عملہ رکن رجسٹرڈ نہیں۔">
+        No staff members registered in the database yet.
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

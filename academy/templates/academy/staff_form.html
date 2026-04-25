@@ -1,0 +1,43 @@
+{% extends 'academy/base.html' %}
+{% load tailwind_filters %}
+
+{% block title %}Add Staff | Jamia Ahsan ul uloom Mardan LMS{% endblock %}
+
+{% block content %}
+<div class="max-w-3xl mx-auto px-6 py-8">
+
+    <div class="mb-6 flex gap-4 no-print">
+        <a href="{% url 'academy:staff_management' %}"
+            class="bg-white/50 border border-primary-dark/20 text-primary-dark px-4 py-2 rounded-xl hover:bg-white transition flex items-center gap-2 font-semibold">
+            <span class="rtl:hidden">&larr;</span><span class="ltr:hidden">&rarr;</span> <span data-en="Back to Staff Roster" data-ur="عملے کی فہرست پر واپس">Back to Staff Roster</span>
+        </a>
+    </div>
+
+    <div class="mb-8">
+        <h1 class="text-primary-dark text-3xl font-bold" data-en="Add New Staff Member" data-ur="نیا عملہ رکن شامل کریں">Add New Staff Member</h1>
+        <p class="text-primary-dark/60 mt-1" data-en="Register a new administrator or faculty member." data-ur="نیا منتظم یا فیکلٹی رکن رجسٹر کریں۔">Register a new administrator or faculty member.</p>
+    </div>
+
+    <!-- Glass Form Card -->
+    <div class="glass-card p-8">
+        {% if messages %}
+        {% for message in messages %}
+        <div
+            class="mb-4 p-4 rounded-xl {% if message.tags == 'success' %}bg-success/20 text-primary-dark{% else %}bg-red-500/20 text-red-800{% endif %}">
+            {{ message }}
+        </div>
+        {% endfor %}
+        {% endif %}
+
+        <form method="post" class="text-primary-dark font-medium">
+            {% csrf_token %}
+            {{ form|crispy }}
+            <button type="submit"
+                class="mt-6 w-full bg-primary-dark hover:bg-primary-teal text-beige font-bold py-3 px-6 rounded-xl transition duration-300 shadow-lg cursor-pointer" data-en="Save Staff Member" data-ur="عملہ رکن محفوظ کریں">
+                Save Staff Member
+            </button>
+        </form>
+    </div>
+
+</div>
+{% endblock %}

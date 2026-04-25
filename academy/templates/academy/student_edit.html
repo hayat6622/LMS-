@@ -1,0 +1,68 @@
+{% extends 'academy/base.html' %}
+{% load tailwind_filters %}
+{% load static %}
+
+{% block title %}Edit Student | {{ student.name }}{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const courseSelect = document.getElementById('id_course');
+        const desiredClassContainer = document.getElementById('div_id_desired_class');
+
+        function toggleDesiredClass() {
+            if (courseSelect.value === 'شعبہ کتب') {
+                desiredClassContainer.classList.remove('hidden');
+            } else {
+                desiredClassContainer.classList.add('hidden');
+            }
+        }
+
+        if (courseSelect && desiredClassContainer) {
+            // Initial state
+            toggleDesiredClass();
+            // On change
+            courseSelect.addEventListener('change', toggleDesiredClass);
+        }
+    });
+</script>
+{% endblock %}
+
+{% block content %}
+<div class="max-w-3xl mx-auto px-6 py-8">
+
+    <div class="mb-6 flex gap-4 no-print">
+        <a href="{% url 'academy:student_profile' student.student_id %}"
+            class="bg-white/50 border border-primary-dark/20 text-primary-dark px-4 py-2 rounded-xl hover:bg-white transition flex items-center gap-2 font-semibold shadow-sm">
+            <span class="rtl:hidden">&larr;</span><span class="ltr:hidden">&rarr;</span> <span data-en="Back to Profile" data-ur="پروفائل پر واپس">Back to Profile</span>
+        </a>
+    </div>
+
+    <div class="mb-8">
+        <h1 class="text-primary-dark text-3xl font-bold" data-en="Edit Student Profile" data-ur="طالب علم کا پروفائل اپ ڈیٹ کریں">Edit Student Profile</h1>
+        <p class="text-primary-dark/60 mt-1" data-en="Update information for {{ student.name }} ({{ student.student_id }})" data-ur="{{ student.name }} کے کوائف اپ ڈیٹ کریں۔">Update information for {{ student.name }} ({{ student.student_id }})</p>
+    </div>
+
+    <!-- Glass Form Card -->
+    <div class="glass-card p-8">
+        {% if messages %}
+        {% for message in messages %}
+        <div
+            class="mb-4 p-4 rounded-xl {% if message.tags == 'success' %}bg-success/20 text-primary-dark{% else %}bg-red-500/20 text-red-800{% endif %}">
+            {{ message }}
+        </div>
+        {% endfor %}
+        {% endif %}
+
+        <form method="post" class="text-primary-dark font-medium">
+            {% csrf_token %}
+            {{ form|crispy }}
+            <button type="submit"
+                class="mt-6 w-full bg-accent-gold hover:bg-accent-light text-primary-dark font-bold py-3 px-6 rounded-xl transition duration-300 shadow-lg cursor-pointer" data-en="Update Profile" data-ur="معلومات محفوظ کریں">
+                Update Profile
+            </button>
+        </form>
+    </div>
+
+</div>
+{% endblock %}

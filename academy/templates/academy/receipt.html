@@ -1,0 +1,249 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en" dir="ltr" id="html-root-receipt">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admission Receipt - {{ student.student_id }}</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&family=Noto+Nastaliq+Urdu:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: { dark: '#0D3B3F', teal: '#135058' },
+                        accent: { gold: '#D4AF37', light: '#E6C27A' },
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        @media print {
+            .no-print {
+                display: none !important;
+            }
+
+            body {
+                background-color: white !important;
+            }
+
+            .print-border {
+                border: 2px solid #0D3B3F;
+            }
+
+            .print-bg {
+                background-color: #f8fafc !important;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
+        }
+    </style>
+</head>
+
+<body class="bg-gray-100 font-sans text-primary-dark min-h-screen p-8 flex flex-col items-center">
+
+    <!-- Action Buttons (Hidden in Print) -->
+    <div class="no-print w-full max-w-[800px] flex justify-between mb-6">
+        <a href="{% url 'academy:admission' %}"
+            class="bg-white border border-gray-300 text-gray-700 px-4 py-2 rounded shadow hover:bg-gray-50 transition">
+            <span class="rtl:hidden">&larr;</span><span class="ltr:hidden">&rarr;</span> <span data-en="Back to Admissions" data-ur="داخلوں پر واپس">Back to Admissions</span>
+        </a>
+        <div class="flex gap-3">
+            <!-- Language Toggle -->
+            <button id="receipt-lang-toggle"
+                class="bg-white border border-gray-300 text-gray-700 font-bold px-4 py-2 rounded shadow hover:bg-gray-50 transition flex items-center gap-2 cursor-pointer">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5h12M9 3v2m1.048 9.5A18.022 18.022 0 016.412 9m6.088 9h7M11 21l5-10 5 10M12.751 5C11.783 10.77 8.07 15.61 3 18.129"></path>
+                </svg>
+                <span id="receipt-lang-label">اردو</span>
+            </button>
+            <button onclick="window.print()"
+                class="bg-accent-gold text-primary-dark font-bold px-6 py-2 rounded shadow hover:bg-accent-light transition flex items-center gap-2 cursor-pointer">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z">
+                    </path>
+                </svg>
+                <span data-en="Print Receipt" data-ur="رسید پرنٹ کریں">Print Receipt</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- Official Receipt Paper -->
+    <div class="bg-white w-full max-w-[800px] p-12 shadow-2xl rounded-sm print-border relative overflow-hidden">
+
+        <!-- Watermark -->
+        <div class="absolute inset-0 flex items-center justify-center opacity-[0.05] pointer-events-none">
+            <img src="{% static 'images/official_logo.jpg' %}" class="w-96 h-96 rounded-full object-contain">
+        </div>
+
+        <!-- Header -->
+        <div class="flex justify-between items-start border-b-2 border-primary-dark pb-6 mb-8 relative z-10">
+            <div class="flex items-center gap-4">
+                <img src="{% static 'images/official_logo.jpg' %}" alt="Logo" class="w-20 h-20 rounded-lg shadow-sm">
+                <div>
+                    <h1 class="text-3xl font-black text-primary-dark tracking-tight leading-tight" data-en="JAMIA AHSAN UL ULOOM" data-ur="جامعہ احسن العلوم">JAMIA AHSAN UL ULOOM</h1>
+                    <h2 class="text-xs font-bold tracking-[0.3em] text-accent-gold uppercase" data-en="MARDAN" data-ur="مردان">MARDAN</h2>
+                </div>
+            </div>
+            <div class="ltr:text-right rtl:text-left">
+                <div class="text-sm font-bold text-gray-500 uppercase tracking-widest mb-1" data-en="Official Receipt" data-ur="سرکاری رسید">Official Receipt</div>
+                <div class="text-xl font-bold text-primary-dark">{{ student.student_id }}</div>
+                <div class="text-sm text-gray-500 mt-1"><span data-en="Date:" data-ur="تاریخ:">Date:</span> {% now "F j, Y" %}</div>
+            </div>
+        </div>
+
+        <!-- Body -->
+        <div class="relative z-10">
+            <!-- ===== PERSONAL DETAILS ===== -->
+            <div class="mb-8">
+                <h3 class="text-md font-bold ltr:border-l-4 rtl:border-r-4 border-accent-gold ltr:pl-3 rtl:pr-3 mb-4 uppercase tracking-wider" data-en="Personal Information" data-ur="ذاتی معلومات">Personal Information</h3>
+                <div class="grid grid-cols-3 gap-3">
+                    <div class="print-bg p-3 rounded bg-gray-50 border border-gray-100 col-span-2">
+                        <div class="text-[10px] text-gray-500 uppercase tracking-wider font-semibold mb-0.5" data-en="Full Name" data-ur="مکمل نام">Full Name</div>
+                        <div class="font-bold text-md text-primary-dark leading-tight" 
+                            data-en="{{ student.name_en|default:student.name }}" 
+                            data-ur="{{ student.name }}">
+                            {{ student.name_en|default:student.name }}</div>
+                    </div>
+                    <div class="print-bg p-3 rounded bg-gray-50 border border-gray-100">
+                        <div class="text-[10px] text-gray-500 uppercase tracking-wider font-semibold mb-0.5" data-en="Date of Birth" data-ur="تاریخ پیدائش">Date of Birth</div>
+                        <div class="font-bold text-md text-primary-dark">{{ student.date_of_birth|date:"F j, Y"|default:"—" }}</div>
+                    </div>
+                    <div class="print-bg p-3 rounded bg-gray-50 border border-gray-100">
+                        <div class="text-[10px] text-gray-500 uppercase tracking-wider font-semibold mb-0.5" data-en="Guardian Name" data-ur="سرپرست کا نام">Guardian Name</div>
+                        <div class="font-bold text-md text-primary-dark">{{ student.guardian_name }}</div>
+                    </div>
+                    <div class="print-bg p-3 rounded bg-gray-50 border border-gray-100">
+                        <div class="text-[10px] text-gray-500 uppercase tracking-wider font-semibold mb-0.5" data-en="Guardian Relation" data-ur="سرپرست کا طالبہ سے رشتہ">Guardian Relation</div>
+                        <div class="font-bold text-md text-primary-dark">{{ student.guardian_relation|default:"—" }}</div>
+                    </div>
+                    <div class="print-bg p-3 rounded bg-gray-50 border border-gray-100">
+                        <div class="text-[10px] text-gray-500 uppercase tracking-wider font-semibold mb-0.5" data-en="Father CNIC" data-ur="والد کا شناختی کارڈ نمبر">Father CNIC</div>
+                        <div class="font-bold text-md text-primary-dark">{{ student.father_cnic|default:"—" }}</div>
+                    </div>
+                    <div class="print-bg p-3 rounded bg-gray-50 border border-gray-100">
+                        <div class="text-[10px] text-gray-500 uppercase tracking-wider font-semibold mb-0.5" data-en="Contact Number" data-ur="رابطہ نمبر">Contact Number</div>
+                        <div class="font-bold text-md text-primary-dark">{{ student.contact_number }}</div>
+                    </div>
+                    <div class="print-bg p-3 rounded bg-gray-50 border border-gray-100 col-span-2">
+                        <div class="text-[10px] text-gray-500 uppercase tracking-wider font-semibold mb-0.5" data-en="Residential Address" data-ur="رہائشی پتہ">Residential Address</div>
+                        <div class="font-bold text-sm text-primary-dark">{{ student.address }}</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ===== ACADEMIC DETAILS ===== -->
+            <div class="mb-8">
+                <h3 class="text-md font-bold ltr:border-l-4 rtl:border-r-4 border-accent-gold ltr:pl-3 rtl:pr-3 mb-4 uppercase tracking-wider" data-en="Academic Details" data-ur="تعلیمی تفصیلات">Academic Details</h3>
+                <div class="grid grid-cols-3 gap-3">
+                    <div class="print-bg p-3 rounded bg-gray-50 border border-gray-100">
+                        <div class="text-[10px] text-gray-500 uppercase tracking-wider font-semibold mb-0.5" data-en="Course" data-ur="کورس">Course</div>
+                        <div class="font-bold text-md text-primary-dark">{{ student.course }}</div>
+                    </div>
+                    <div class="print-bg p-3 rounded bg-gray-50 border border-gray-100">
+                        <div class="text-[10px] text-gray-500 uppercase tracking-wider font-semibold mb-0.5" data-en="Desired Class" data-ur="مطلوبہ درجہ">Desired Class</div>
+                        <div class="font-bold text-md text-primary-dark">{{ student.desired_class|default:"—" }}</div>
+                    </div>
+                    <div class="print-bg p-3 rounded bg-gray-50 border border-gray-100">
+                        <div class="text-[10px] text-gray-500 uppercase tracking-wider font-semibold mb-0.5" data-en="Enrollment Date" data-ur="داخلے کی تاریخ">Enrollment Date</div>
+                        <div class="font-bold text-md text-primary-dark">{{ student.enrollment_date|date:"F j, Y" }}</div>
+                    </div>
+                    <div class="print-bg p-3 rounded bg-gray-50 border border-gray-100">
+                        <div class="text-[10px] text-gray-500 uppercase tracking-wider font-semibold mb-0.5" data-en="First Class in Jamia" data-ur="جامعہ میں پہلا درجہ">First Class in Jamia</div>
+                        <div class="font-bold text-md text-primary-dark">{{ student.first_class_in_jamia|default:"—" }}</div>
+                    </div>
+                    <div class="print-bg p-3 rounded bg-gray-50 border border-gray-100">
+                        <div class="text-[10px] text-gray-500 uppercase tracking-wider font-semibold mb-0.5" data-en="Wifaq Reg. No." data-ur="وفاق المدارس رقم التسجیل">Wifaq Reg. No.</div>
+                        <div class="font-bold text-md text-primary-dark">{{ student.wifaq_registration_number|default:"—" }}</div>
+                    </div>
+                    <div class="print-bg p-3 rounded bg-gray-50 border border-gray-100">
+                        <div class="text-[10px] text-gray-500 uppercase tracking-wider font-semibold mb-0.5" data-en="Roll Number" data-ur="رقم الجلوس">Roll Number</div>
+                        <div class="font-bold text-md text-primary-dark">{{ student.roll_number|default:"—" }}</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ===== DEPARTURE DETAILS (If applicable) ===== -->
+            {% if student.date_of_leaving %}
+            <div class="mb-8">
+                <h3 class="text-md font-bold ltr:border-l-4 rtl:border-r-4 border-accent-gold ltr:pl-3 rtl:pr-3 mb-4 uppercase tracking-wider" data-en="Departure Details" data-ur="اخراج کی تفصیلات">Departure Details</h3>
+                <div class="grid grid-cols-2 gap-3">
+                    <div class="print-bg p-3 rounded bg-gray-50 border border-gray-100">
+                        <div class="text-[10px] text-gray-500 uppercase tracking-wider font-semibold mb-0.5" data-en="Date of Leaving" data-ur="تاریخ اخراج">Date of Leaving</div>
+                        <div class="font-bold text-md text-primary-dark">{{ student.date_of_leaving|date:"F j, Y" }}</div>
+                    </div>
+                    <div class="print-bg p-3 rounded bg-gray-50 border border-gray-100">
+                        <div class="text-[10px] text-gray-500 uppercase tracking-wider font-semibold mb-0.5" data-en="Reason for Leaving" data-ur="وجہ اخراج">Reason for Leaving</div>
+                        <div class="font-bold text-md text-primary-dark">{{ student.reason_for_leaving|default:"—" }}</div>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+
+            <!-- Footer Signatures -->
+            <div class="flex justify-between items-end mt-24 pt-8 border-t border-gray-200">
+                <div class="text-center w-48">
+                    <div class="border-b border-gray-800 mb-2 h-8"></div>
+                    <div class="text-xs font-bold text-gray-500 uppercase" data-en="Guardian Signature" data-ur="سرپرست کے دستخط">Guardian Signature</div>
+                </div>
+
+                <div class="text-center w-48">
+                    <div class="border-b border-gray-800 mb-2 h-8"></div>
+                    <div class="text-xs font-bold text-gray-500 uppercase" data-en="Administrator Authorization" data-ur="منتظم کی تصدیق">Administrator Authorization</div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Language Toggle Script for Receipt (standalone page) -->
+    <script>
+        (function() {
+            const htmlRoot = document.getElementById('html-root-receipt');
+            const langToggle = document.getElementById('receipt-lang-toggle');
+            const langLabel = document.getElementById('receipt-lang-label');
+
+            let currentLang = localStorage.getItem('lms-lang') || 'en';
+
+            function applyLanguage(lang) {
+                currentLang = lang;
+                localStorage.setItem('lms-lang', lang);
+
+                if (lang === 'ur') {
+                    htmlRoot.setAttribute('lang', 'ur');
+                    htmlRoot.setAttribute('dir', 'rtl');
+                    document.body.style.fontFamily = "'Noto Nastaliq Urdu', 'Inter', sans-serif";
+                    langLabel.textContent = 'English';
+                } else {
+                    htmlRoot.setAttribute('lang', 'en');
+                    htmlRoot.setAttribute('dir', 'ltr');
+                    document.body.style.fontFamily = "'Inter', sans-serif";
+                    langLabel.textContent = 'اردو';
+                }
+
+                document.querySelectorAll('[data-en][data-ur]').forEach(el => {
+                    el.textContent = el.getAttribute('data-' + lang);
+                });
+
+                document.querySelectorAll('[data-placeholder-en][data-placeholder-ur]').forEach(el => {
+                    el.setAttribute('placeholder', el.getAttribute('data-placeholder-' + lang));
+                });
+            }
+
+            applyLanguage(currentLang);
+
+            langToggle.addEventListener('click', function() {
+                applyLanguage(currentLang === 'en' ? 'ur' : 'en');
+            });
+        })();
+    </script>
+</body>
+
+</html>

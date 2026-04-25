@@ -1,0 +1,82 @@
+{% extends 'academy/base.html' %}
+{% load static %}
+
+{% block title %}Leave Management | Jamia Ahsan ul uloom Mardan LMS{% endblock %}
+
+{% block content %}
+<div class="max-w-[1200px] mx-auto px-6 py-8">
+
+    <div class="mb-6 flex gap-4 no-print">
+        <a href="{% url 'academy:dashboard' %}"
+            class="bg-white/50 border border-primary-dark/20 text-primary-dark px-4 py-2 rounded-xl hover:bg-white transition flex items-center gap-2 font-semibold shadow-sm">
+            <span class="rtl:hidden">&larr;</span><span class="ltr:hidden">&rarr;</span> <span data-en="Back to Dashboard" data-ur="ڈیش بورڈ پر واپس">Back to Dashboard</span>
+        </a>
+    </div>
+
+    <div class="mb-8">
+        <h1 class="text-primary-dark text-3xl font-bold" data-en="Leave Requests" data-ur="چھٹی کی درخواستیں">Leave Requests</h1>
+        <p class="text-primary-dark/60 mt-1" data-en="Review and approve scholar leave of absence requests." data-ur="طلباء کی چھٹی کی درخواستوں کا جائزہ لیں اور منظوری دیں۔">Review and approve scholar leave of absence requests.</p>
+    </div>
+
+    <!-- Leaves List -->
+    <div class="glass-card overflow-hidden">
+        {% if leaves %}
+        <table class="w-full ltr:text-left rtl:text-right border-collapse">
+            <thead>
+                <tr class="bg-primary-dark/5 border-b border-primary-dark/10">
+                    <th class="p-4 text-xs tracking-wider uppercase text-primary-dark/60 font-bold" data-en="Student" data-ur="طالب علم">Student</th>
+                    <th class="p-4 text-xs tracking-wider uppercase text-primary-dark/60 font-bold" data-en="Duration" data-ur="مدت">Duration</th>
+                    <th class="p-4 text-xs tracking-wider uppercase text-primary-dark/60 font-bold" data-en="Reason" data-ur="وجہ">Reason</th>
+                    <th class="p-4 text-xs tracking-wider uppercase text-primary-dark/60 font-bold" data-en="Status" data-ur="حالت">Status</th>
+                    <th class="p-4 text-xs tracking-wider uppercase text-primary-dark/60 font-bold ltr:text-right rtl:text-left" data-en="Actions" data-ur="اقدامات">Actions
+                    </th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for leave in leaves %}
+                <tr class="border-b border-primary-dark/5 hover:bg-white/30 transition">
+                    <td class="p-4">
+                        <div class="font-bold text-primary-dark">{{ leave.student.name }}</div>
+                        <div class="text-xs text-primary-dark/50">{{ leave.student.student_id }}</div>
+                    </td>
+                    <td class="p-4">
+                        <div class="font-medium text-primary-dark/80">{{ leave.start_date|date:"M j" }} &rarr; {{
+                            leave.end_date|date:"M j, Y" }}</div>
+                    </td>
+                    <td class="p-4 max-w-xs text-sm text-primary-dark/70 truncate">
+                        {{ leave.reason }}
+                    </td>
+                    <td class="p-4">
+                        {% if leave.status == 'Pending' %}
+                        <span
+                            class="bg-yellow-100 text-yellow-800 text-xs font-semibold px-2.5 py-0.5 rounded-full border border-yellow-200" data-en="Pending" data-ur="زیر التواء">Pending</span>
+                        {% elif leave.status == 'Approved' %}
+                        <span
+                            class="bg-green-100 text-green-800 text-xs font-semibold px-2.5 py-0.5 rounded-full border border-green-200" data-en="Approved" data-ur="منظور شدہ">Approved</span>
+                        {% else %}
+                        <span
+                            class="bg-red-100 text-red-800 text-xs font-semibold px-2.5 py-0.5 rounded-full border border-red-200" data-en="Rejected" data-ur="مسترد">Rejected</span>
+                        {% endif %}
+                    </td>
+                    <td class="p-4 ltr:text-right rtl:text-left space-x-2 rtl:space-x-reverse">
+                        {% if leave.status == 'Pending' %}
+                        <button
+                            class="bg-success text-white px-3 py-1 rounded shadow hover:bg-green-500 text-xs font-bold transition" data-en="Approve" data-ur="منظور">Approve</button>
+                        <button
+                            class="bg-red-500 text-white px-3 py-1 rounded shadow hover:bg-red-600 text-xs font-bold transition" data-en="Reject" data-ur="مسترد">Reject</button>
+                        {% else %}
+                        <span class="text-xs text-primary-dark/40 font-semibold italic" data-en="Processed" data-ur="مکمل">Processed</span>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <div class="p-8 text-center text-primary-dark/60 font-semibold" data-en="No leave requests have been filed." data-ur="ابھی تک کوئی چھٹی کی درخواست جمع نہیں کی گئی۔">
+            No leave requests have been filed.
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

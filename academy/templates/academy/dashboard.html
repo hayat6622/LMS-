@@ -1,0 +1,175 @@
+{% extends 'academy/base.html' %}
+{% load static %}
+
+{% block title %}Dashboard | Jamia Ahsan ul uloom Mardan{% endblock %}
+
+{% block content %}
+<div class="max-w-[1200px] mx-auto px-6 py-8">
+
+    <!-- Subheader & Date -->
+    <div class="flex flex-col md:flex-row justify-between items-start md:items-end mb-8 gap-4">
+        <div>
+            <h1 class="text-primary-dark text-3xl font-bold mb-1" data-en="Welcome back, Admin 👋" data-ur="خوش آمدید، ایڈمن 👋">Welcome back, Admin 👋</h1>
+            <p class="text-primary-dark/60 font-medium" data-en="Here's what's happening at Jamia Ahsan ul uloom today." data-ur="آج جامعہ احسن العلوم میں کیا ہو رہا ہے۔">Here's what's happening at Jamia Ahsan ul uloom today.</p>
+        </div>
+
+        <!-- Date Selector -->
+        <div
+            class="glass-card px-4 py-2 flex items-center gap-3 relative cursor-pointer hover:bg-white/60 transition group">
+            <div
+                class="p-2 bg-primary-dark/5 rounded-lg text-accent-gold group-hover:text-primary-dark transition-colors shrink-0">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z">
+                    </path>
+                </svg>
+            </div>
+            <div class="relative">
+                <div class="text-xs text-primary-dark/50 font-bold tracking-wider mb-0.5" data-en="SELECTED DATE" data-ur="منتخب تاریخ">SELECTED DATE</div>
+                <input type="date" value="{% now 'Y-m-d' %}"
+                    class="font-bold text-primary-dark bg-transparent border-none outline-none cursor-pointer p-0 m-0 w-32 focus:ring-0">
+            </div>
+        </div>
+    </div>
+
+    <!-- Metrics Grid -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
+
+        <!-- Students -->
+        <a href="{% url 'academy:directory' %}" class="block h-full group">
+            <div class="glass-card flex flex-col justify-between h-full p-6">
+                <div class="flex justify-between items-start">
+                    <div>
+                        <h3 class="text-primary-dark/70 font-semibold text-xs tracking-widest uppercase mb-2" data-en="Total Students" data-ur="کل طلباء">Total
+                            Students</h3>
+                        <div class="text-3xl font-black text-primary-dark">{{ total_students }}</div>
+                    </div>
+                    <img src="{% static 'icons/scholar.svg' %}"
+                        class="w-20 h-20 transition-transform group-hover:scale-110 duration-300">
+                </div>
+                <p class="text-primary-dark/60 font-medium text-sm mt-4" data-en="Registered Scholars" data-ur="رجسٹرڈ طلباء">Registered Scholars</p>
+            </div>
+        </a>
+
+        <!-- Attendance -->
+        <a href="{% url 'academy:attendance' %}" class="block h-full group">
+            <div class="glass-card flex flex-col justify-between h-full p-6">
+                <div class="flex justify-between items-start">
+                    <div>
+                        <h3 class="text-primary-dark/70 font-semibold text-xs tracking-widest uppercase mb-2" data-en="Today's Attendance" data-ur="آج کی حاضری">Today's
+                            Attendance</h3>
+                        <div class="text-3xl font-black text-primary-dark">--%</div>
+                    </div>
+                    <!-- Attendance Arc Mock -->
+                    <div class="relative w-20 h-20 flex items-center justify-center">
+                        <svg class="w-full h-full transform -rotate-90" viewBox="0 0 36 36">
+                            <path class="text-accent-light/20"
+                                d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+                                fill="none" stroke="currentColor" stroke-width="4" stroke-dasharray="100, 100" />
+                            <path class="text-success"
+                                d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+                                fill="none" stroke="currentColor" stroke-width="4" stroke-dasharray="100, 100" />
+                        </svg>
+                        <svg class="w-8 h-8 text-success absolute" fill="none" stroke="currentColor"
+                            viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                    </div>
+                </div>
+                <p class="text-primary-dark/60 font-medium text-sm mt-4" data-en="Overall Presence" data-ur="مجموعی حاضری">Overall Presence</p>
+            </div>
+        </a>
+
+        <!-- Staff -->
+        <a href="{% url 'academy:staff_management' %}" class="block h-full group">
+            <div class="glass-card flex flex-col justify-between h-full p-6">
+                <div class="flex justify-between items-start">
+                    <div>
+                        <h3 class="text-primary-dark/70 font-semibold text-xs tracking-widest uppercase mb-2" data-en="Staff Members" data-ur="عملے کے ارکان">Staff
+                            Members</h3>
+                        <div class="text-3xl font-black text-primary-dark">{{ total_staff }}</div>
+                    </div>
+                    <img src="{% static 'icons/staff.svg' %}"
+                        class="w-20 h-20 transition-transform group-hover:scale-110 duration-300">
+                </div>
+                <p class="text-primary-dark/60 font-medium text-sm mt-4" data-en="Active Personnel" data-ur="فعال عملہ">Active Personnel</p>
+            </div>
+        </a>
+
+        <!-- Leaves -->
+        <a href="{% url 'academy:leave_management' %}" class="block h-full group">
+            <div class="glass-card flex flex-col justify-between h-full p-6">
+                <div class="flex justify-between items-start">
+                    <div>
+                        <h3 class="text-primary-dark/70 font-semibold text-xs tracking-widest uppercase mb-2" data-en="Pending Leaves" data-ur="زیر التواء چھٹیاں">Pending
+                            Leaves</h3>
+                        <div class="text-3xl font-black text-primary-dark">{{ pending_leaves }}</div>
+                    </div>
+                    <img src="{% static 'icons/leaves.svg' %}"
+                        class="w-20 h-20 transition-transform group-hover:scale-110 duration-300">
+                </div>
+                <p class="text-primary-dark/60 font-medium text-sm mt-4" data-en="Requires Approval" data-ur="منظوری درکار">Requires Approval</p>
+            </div>
+        </a>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="mb-6 flex items-center gap-4">
+        <h2 class="text-2xl font-bold text-primary-dark" data-en="Quick Actions" data-ur="فوری اقدامات">Quick Actions</h2>
+        <div class="h-px flex-1 bg-gradient-to-r from-accent-gold/50 to-transparent"></div>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-20">
+
+        <!-- Admission Tile -->
+        <a href="{% url 'academy:admission' %}" class="block">
+            <div class="action-tile p-8 flex flex-col items-center justify-center text-center group h-64">
+                <img src="{% static 'images/official_logo.jpg' %}"
+                    class="action-tile-bg-svg transition-transform group-hover:rotate-12 duration-500 rounded-full overflow-hidden opacity-20">
+                <img src="{% static 'icons/quill.svg' %}"
+                    class="w-20 h-20 mb-6 transition-transform group-hover:-translate-y-2 duration-300">
+                <h3 class="text-beige text-xl font-bold mb-2" data-en="New Admission" data-ur="نیا داخلہ">New Admission</h3>
+                <p class="text-accent-light/80 text-sm" data-en="Enroll a new student into the academy's registry." data-ur="اکیڈمی کے رجسٹر میں نیا طالب علم داخل کریں۔">Enroll a new student into the academy's registry.</p>
+            </div>
+        </a>
+
+        <!-- Mark Attendance Tile -->
+        <a href="{% url 'academy:attendance' %}" class="block">
+            <div class="action-tile p-8 flex flex-col items-center justify-center text-center group h-64">
+                <img src="{% static 'images/official_logo.jpg' %}"
+                    class="action-tile-bg-svg transition-transform group-hover:rotate-12 duration-500 rounded-full overflow-hidden opacity-20">
+                <img src="{% static 'icons/register.svg' %}"
+                    class="w-20 h-20 mb-6 transition-transform group-hover:-translate-y-2 duration-300">
+                <h3 class="text-beige text-xl font-bold mb-2" data-en="Mark Attendance" data-ur="حاضری لگائیں">Mark Attendance</h3>
+                <p class="text-accent-light/80 text-sm" data-en="Record daily presence for scholars and staff." data-ur="طلباء اور عملے کی روزانہ حاضری درج کریں۔">Record daily presence for scholars and staff.</p>
+            </div>
+        </a>
+
+        <!-- Publish Results Tile -->
+        <a href="{% url 'academy:result_bulk_entry' %}" class="block">
+            <div class="action-tile p-8 flex flex-col items-center justify-center text-center group h-64">
+                <img src="{% static 'images/official_logo.jpg' %}"
+                    class="action-tile-bg-svg transition-transform group-hover:rotate-12 duration-500 rounded-full overflow-hidden opacity-20">
+                <img src="{% static 'icons/tablet.svg' %}"
+                    class="w-20 h-20 mb-6 transition-transform group-hover:-translate-y-2 duration-300">
+                <h3 class="text-beige text-xl font-bold mb-2" data-en="Publish Results" data-ur="نتائج شائع کریں">Publish Results</h3>
+                <p class="text-accent-light/80 text-sm" data-en="Enter and manage student examination results." data-ur="طلباء کے امتحانی نتائج درج اور منظم کریں۔">Enter and manage student examination results.</p>
+            </div>
+        </a>
+
+        <!-- Manage Subjects Tile -->
+        <a href="{% url 'academy:subjects_manage' %}" class="block md:col-start-2">
+            <div class="action-tile p-8 flex flex-col items-center justify-center text-center group h-64">
+                <img src="{% static 'images/official_logo.jpg' %}"
+                    class="action-tile-bg-svg transition-transform group-hover:rotate-12 duration-500 rounded-full overflow-hidden opacity-20">
+                <img src="{% static 'icons/notes.svg' %}"
+                    class="w-20 h-20 mb-6 transition-transform group-hover:-translate-y-2 duration-300">
+                <h3 class="text-beige text-xl font-bold mb-2" data-en="Manage Subjects" data-ur="مضامین ترتیب دیں">Manage Subjects</h3>
+                <p class="text-accent-light/80 text-sm" data-en="Define subjects for each academic class." data-ur="ہر تعلیمی درجے کے لیے مضامین ترتیب دیں۔">Define subjects for each academic class.</p>
+            </div>
+        </a>
+
+    </div>
+</div>
+{% endblock %}

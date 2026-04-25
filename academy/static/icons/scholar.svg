@@ -1,0 +1,21 @@
+<svg width="80" height="80" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="scholarGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stopColor="#0D3B3F" />
+      <stop offset="100%" stopColor="#1E5631" />
+    </linearGradient>
+    <linearGradient id="goldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stopColor="#FDE08B" />
+      <stop offset="100%" stopColor="#D4AF37" />
+    </linearGradient>
+  </defs>
+  <circle cx="60" cy="60" r="45" fill="url(#scholarGrad)" opacity="0.1" />
+  <path d="M60 15L70 30L85 30L75 42.5L80 57.5L60 50L40 57.5L45 42.5L35 30L50 30L60 15Z" fill="url(#goldGrad)" opacity="0.2" />
+  <path d="M45 45C45 35 50 25 60 25C70 25 75 35 75 45C75 55 70 60 60 60C50 60 45 55 45 45Z" fill="#E5C79E" />
+  <path d="M35 40C35 30 45 20 60 20C75 20 85 30 85 40C85 45 80 50 75 50C70 50 65 45 60 45C55 45 50 50 45 50C40 50 35 45 35 40Z" fill="white" />
+  <path d="M48 55C48 55 55 75 60 75C65 75 72 55 72 55C72 55 65 65 60 65C55 65 48 55 48 55Z" fill="#EAEAEA" />
+  <path d="M30 100C30 80 40 70 60 70C80 70 90 80 90 100H30Z" fill="url(#scholarGrad)" />
+  <path d="M45 80L75 75L80 95L50 100L45 80Z" fill="url(#goldGrad)" />
+  <path d="M45 80L50 100" stroke="#8B6914" strokeWidth="2" />
+  <path d="M75 75L80 95" stroke="#8B6914" strokeWidth="2" />
+</svg>

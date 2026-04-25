@@ -1,0 +1,22 @@
+<svg width="80" height="80" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="femaleGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stopColor="#9C6B30" />
+      <stop offset="100%" stopColor="#D4AF37" />
+    </linearGradient>
+    <linearGradient id="maleGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stopColor="#0B3A42" />
+      <stop offset="100%" stopColor="#135058" />
+    </linearGradient>
+  </defs>
+  <g transform="translate(15, 20)">
+    <path d="M30 15C30 5 45 5 45 15C45 30 55 40 55 60C55 75 20 75 20 60C20 40 30 30 30 15Z" fill="url(#femaleGrad)" />
+    <path d="M25 60C25 50 35 45 37.5 45C40 45 50 50 50 60C50 80 25 80 25 60Z" fill="#F4EFE6" opacity="0.9" />
+  </g>
+  <g transform="translate(45, 10)">
+    <path d="M25 25C25 15 35 15 35 25C35 35 30 40 30 40C30 40 25 35 25 25Z" fill="#E5C79E" />
+    <path d="M23 20C23 15 37 15 37 20C37 25 23 25 23 20Z" fill="white" />
+    <path d="M15 85C15 65 25 50 30 50C35 50 45 65 45 85H15Z" fill="url(#maleGrad)" />
+    <path d="M25 18L30 22L35 18" stroke="#D4AF37" strokeWidth="1" />
+  </g>
+</svg>

@@ -1,0 +1,22 @@
+<svg width="80" height="80" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="scrollGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stopColor="#FFF4D2" />
+      <stop offset="100%" stopColor="#E6C27A" />
+    </linearGradient>
+    <filter id="glowClock" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="4" stdDeviation="4" floodColor="#0D3B3F" floodOpacity="0.3" />
+    </filter>
+  </defs>
+  <path d="M30 30C30 20 40 20 40 30V80C40 90 30 90 30 80V30Z" fill="#C9A358" />
+  <path d="M35 25H80C90 25 90 35 80 35H35V25Z" fill="url(#scrollGrad)" />
+  <path d="M40 35H85V85H40V35Z" fill="url(#scrollGrad)" />
+  <path d="M85 85H40C40 95 50 95 50 85V35" fill="#DDB265" />
+  <line x1="45" y1="45" x2="75" y2="45" stroke="#8B6914" strokeWidth="2" strokeOpacity="0.3" strokeLinecap="round" />
+  <line x1="45" y1="55" x2="65" y2="55" stroke="#8B6914" strokeWidth="2" strokeOpacity="0.3" strokeLinecap="round" />
+  
+  <circle cx="80" cy="80" r="22" fill="#0D3B3F" filter="url(#glowClock)" />
+  <circle cx="80" cy="80" r="18" fill="#135058" stroke="#D4AF37" strokeWidth="3" />
+  <circle cx="80" cy="80" r="2" fill="#D4AF37" />
+  <path d="M80 70V80L86 86" stroke="#D4AF37" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
+</svg>

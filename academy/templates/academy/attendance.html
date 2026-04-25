@@ -1,0 +1,160 @@
+{% extends 'academy/base.html' %}
+{% load static %}
+
+{% block title %}Attendance Sheet | Jamia Ahsan ul uloom Mardan LMS{% endblock %}
+
+{% block content %}
+<div class="max-w-[1200px] mx-auto px-6 py-8">
+
+    <!-- Header & Back Button -->
+    <div class="mb-6 flex justify-between items-center no-print">
+        <a href="{% url 'academy:dashboard' %}"
+            class="bg-white/50 border border-primary-dark/20 text-primary-dark px-4 py-2 rounded-xl hover:bg-white transition flex items-center gap-2 font-semibold shadow-sm">
+            <span class="rtl:hidden">&larr;</span><span class="ltr:hidden">&rarr;</span> 
+            <span data-en="Back to Dashboard" data-ur="ڈیش بورڈ پر واپس">Back to Dashboard</span>
+        </a>
+        <h1 class="text-primary-dark text-2xl font-bold hidden md:block" data-en="Attendance Sheet" data-ur="حاضری شیٹ">Attendance Sheet</h1>
+    </div>
+
+    <!-- Filters Section -->
+    <div class="glass-card p-6 mb-8 no-print">
+        <form method="GET" class="grid grid-cols-1 md:grid-cols-4 gap-6 items-end">
+            <!-- Date Picker -->
+            <div>
+                <label class="block text-primary-dark/60 text-sm mb-2 font-bold" data-en="Date" data-ur="تاریخ">Date</label>
+                <input type="date" name="date" value="{{ date }}" 
+                    class="w-full px-4 py-2 bg-white/50 border border-primary-dark/10 rounded-xl focus:outline-none focus:ring-2 focus:ring-accent-gold/50 text-primary-dark font-medium">
+            </div>
+
+            <!-- Department Filter -->
+            <div>
+                <label class="block text-primary-dark/60 text-sm mb-2 font-bold" data-en="Department" data-ur="شعبہ">Department</label>
+                <select name="course" class="w-full px-4 py-2 bg-white/50 border border-primary-dark/10 rounded-xl focus:outline-none focus:ring-2 focus:ring-accent-gold/50 text-primary-dark font-medium">
+                    <option value="All" {% if course_filter == 'All' %}selected{% endif %} data-en="All Departments" data-ur="تمام شعبہ جات">All Departments</option>
+                    {% for dept in departments %}
+                        <option value="{{ dept }}" {% if course_filter == dept %}selected{% endif %}>{{ dept }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <!-- Class Filter -->
+            <div>
+                <label class="block text-primary-dark/60 text-sm mb-2 font-bold" data-en="Class" data-ur="درجہ">Class</label>
+                <select name="desired_class" class="w-full px-4 py-2 bg-white/50 border border-primary-dark/10 rounded-xl focus:outline-none focus:ring-2 focus:ring-accent-gold/50 text-primary-dark font-medium">
+                    <option value="" data-en="All Classes" data-ur="تمام درجات">All Classes</option>
+                    {% for cls in unique_classes %}
+                        <option value="{{ cls }}" {% if class_filter == cls %}selected{% endif %}>{{ cls }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <!-- Filter Button -->
+            <button type="submit" class="bg-primary-dark text-beige px-6 py-2 rounded-xl font-bold hover:bg-opacity-90 transition-all shadow-md flex items-center justify-center gap-2">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"></path></svg>
+                <span data-en="Load List" data-ur="فہرست لوڈ کریں">Load List</span>
+            </button>
+        </form>
+    </div>
+
+    <!-- Attendance Form -->
+    <form method="POST">
+        {% csrf_token %}
+        <div class="glass-card overflow-hidden">
+            <div class="p-6 border-b border-primary-dark/10 flex justify-between items-center bg-primary-dark/5">
+                <div class="flex items-center gap-3">
+                    <div class="p-2 bg-primary-dark/10 rounded-lg">
+                        <svg class="w-6 h-6 text-primary-dark" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path></svg>
+                    </div>
+                    <div>
+                        <h2 class="text-primary-dark font-bold text-lg" data-en="Student Roll Call" data-ur="طلباء کی حاضری">Student Roll Call</h2>
+                        <p class="text-primary-dark/60 text-xs" data-en="Marking for: {{ attendance_date|date:'d M, Y' }}" data-ur="تاریخ: {{ attendance_date|date:'d M, Y' }}">Marking for: {{ attendance_date|date:'d M, Y' }}</p>
+                    </div>
+                </div>
+                
+                <div class="flex gap-2">
+                    <button type="button" onclick="markAll('Present')" class="text-[10px] font-bold uppercase tracking-wider px-3 py-1 rounded bg-success/10 text-success border border-success/20 hover:bg-success hover:text-white transition-all">
+                        <span data-en="Mark All Present" data-ur="سب کو حاضر کریں">Mark All Present</span>
+                    </button>
+                    <button type="submit" class="bg-primary-dark text-beige px-6 py-2 rounded-xl font-bold hover:bg-opacity-90 transition-all shadow-md flex items-center gap-2">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                        <span data-en="Save Attendance" data-ur="حاضری محفوظ کریں">Save Attendance</span>
+                    </button>
+                </div>
+            </div>
+
+            <div class="overflow-x-auto">
+                <table class="w-full text-left rtl:text-right border-collapse">
+                    <thead class="bg-primary-dark/5 text-primary-dark/70 text-xs font-bold uppercase tracking-wider">
+                        <tr>
+                            <th class="px-6 py-4">ID</th>
+                            <th class="px-6 py-4"><span data-en="Student Name" data-ur="طالب علم کا نام">Student Name</span></th>
+                            <th class="px-6 py-4"><span data-en="Current Status" data-ur="موجودہ حالت">Current Status</span></th>
+                            <th class="px-6 py-4 text-center"><span data-en="Present" data-ur="حاضر">Present</span></th>
+                            <th class="px-6 py-4 text-center"><span data-en="Absent" data-ur="غیر حاضر">Absent</span></th>
+                            <th class="px-6 py-4 text-center"><span data-en="Leave" data-ur="رخصت">Leave</span></th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-primary-dark/10">
+                        {% for student in students %}
+                        <tr class="hover:bg-primary-dark/5 transition-colors group">
+                            <td class="px-6 py-4 font-mono text-xs text-primary-dark/50">{{ student.student_id }}</td>
+                            <td class="px-6 py-4 font-bold text-primary-dark">
+                                {{ student.name_en|default:student.name }}
+                                <div class="text-[10px] opacity-50 font-normal">{{ student.name }}</div>
+                            </td>
+                            <td class="px-6 py-4">
+                                {% if student.current_status == 'Present' %}
+                                    <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-success/10 text-success uppercase">Present</span>
+                                {% elif student.current_status == 'Absent' %}
+                                    <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-error/10 text-error uppercase">Absent</span>
+                                {% else %}
+                                    <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-warning/10 text-warning uppercase">Leave</span>
+                                {% endif %}
+                            </td>
+                            <td class="px-6 py-4 text-center">
+                                <label class="cursor-pointer inline-block">
+                                    <input type="radio" name="status_{{ student.student_id }}" value="Present" 
+                                        {% if student.current_status == 'Present' %}checked{% endif %}
+                                        class="attendance-radio w-6 h-6 text-success border-gray-300 focus:ring-success accent-success">
+                                </label>
+                            </td>
+                            <td class="px-6 py-4 text-center">
+                                <label class="cursor-pointer inline-block">
+                                    <input type="radio" name="status_{{ student.student_id }}" value="Absent" 
+                                        {% if student.current_status == 'Absent' %}checked{% endif %}
+                                        class="attendance-radio w-6 h-6 text-error border-gray-300 focus:ring-error accent-error">
+                                </label>
+                            </td>
+                            <td class="px-6 py-4 text-center">
+                                <label class="cursor-pointer inline-block">
+                                    <input type="radio" name="status_{{ student.student_id }}" value="Leave" 
+                                        {% if student.current_status == 'Leave' %}checked{% endif %}
+                                        class="attendance-radio w-6 h-6 text-warning border-gray-300 focus:ring-warning accent-warning">
+                                </label>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="6" class="px-6 py-12 text-center">
+                                <p class="text-primary-dark/40 font-bold" data-en="No students found for the selected filters." data-ur="منتخب فلٹرز کے لیے کوئی طالب علم نہیں ملا۔">No students found for the selected filters.</p>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </form>
+</div>
+
+<script>
+function markAll(status) {
+    const radios = document.querySelectorAll('.attendance-radio');
+    radios.forEach(radio => {
+        if (radio.value === status) {
+            radio.checked = true;
+        }
+    });
+}
+</script>
+{% endblock %}

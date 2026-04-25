@@ -1,0 +1,71 @@
+{% extends 'academy/base.html' %}
+{% load tailwind_filters %}
+{% load static %}
+
+{% block title %}New Admission | Jamia Ahsan ul uloom Mardan LMS{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const courseSelect = document.getElementById('id_course');
+        const desiredClassContainer = document.getElementById('div_id_desired_class');
+
+        function toggleDesiredClass() {
+            if (courseSelect.value === 'شعبہ کتب') {
+                desiredClassContainer.classList.remove('hidden');
+            } else {
+                desiredClassContainer.classList.add('hidden');
+                // Optional: clear the value when hidden
+                const classSelect = document.getElementById('id_desired_class');
+                if (classSelect) classSelect.value = '';
+            }
+        }
+
+        if (courseSelect && desiredClassContainer) {
+            // Initial state
+            toggleDesiredClass();
+            // On change
+            courseSelect.addEventListener('change', toggleDesiredClass);
+        }
+    });
+</script>
+{% endblock %}
+
+{% block content %}
+<div class="max-w-3xl mx-auto px-6 py-8">
+
+    <div class="mb-6 flex gap-4 no-print">
+        <a href="{% url 'academy:dashboard' %}"
+            class="bg-white/50 border border-primary-dark/20 text-primary-dark px-4 py-2 rounded-xl hover:bg-white transition flex items-center gap-2 font-semibold shadow-sm">
+            <span class="rtl:hidden">&larr;</span><span class="ltr:hidden">&rarr;</span> <span data-en="Back to Dashboard" data-ur="ڈیش بورڈ پر واپس">Back to Dashboard</span>
+        </a>
+    </div>
+
+    <div class="mb-8">
+        <h1 class="text-primary-dark text-3xl font-bold" data-en="New Admission" data-ur="نیا داخلہ">New Admission</h1>
+        <p class="text-primary-dark/60 mt-1" data-en="Enroll a new scholar into the academy." data-ur="اکیڈمی میں نیا طالب علم داخل کریں۔">Enroll a new scholar into the academy.</p>
+    </div>
+
+    <!-- Glass Form Card -->
+    <div class="glass-card p-8">
+        {% if messages %}
+        {% for message in messages %}
+        <div
+            class="mb-4 p-4 rounded-xl {% if message.tags == 'success' %}bg-success/20 text-primary-dark{% else %}bg-red-500/20 text-red-800{% endif %}">
+            {{ message }}
+        </div>
+        {% endfor %}
+        {% endif %}
+
+        <form method="post" class="text-primary-dark font-medium">
+            {% csrf_token %}
+            {{ form|crispy }}
+            <button type="submit"
+                class="mt-6 w-full bg-accent-gold hover:bg-accent-light text-primary-dark font-bold py-3 px-6 rounded-xl transition duration-300 shadow-lg cursor-pointer" data-en="Register Scholar" data-ur="طالب علم رجسٹر کریں">
+                Register Scholar
+            </button>
+        </form>
+    </div>
+
+</div>
+{% endblock %}

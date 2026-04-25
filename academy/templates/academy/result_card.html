@@ -1,0 +1,144 @@
+{% extends 'academy/base.html' %}
+{% load static %}
+
+{% block title %}Result Card | {{ student.name }}{% endblock %}
+
+{% block extra_css %}
+<style>
+    @media print {
+        .no-print { display: none !important; }
+        body { background: white !important; }
+        .glass-card { 
+            background: white !important; 
+            box-shadow: none !important; 
+            border: 2px solid #1a1a1a !important;
+            backdrop-filter: none !important;
+        }
+    }
+    .result-table th, .result-table td {
+        border: 1px solid rgba(26, 26, 26, 0.1);
+    }
+    .watermark {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%) rotate(-45deg);
+        font-size: 5rem;
+        color: rgba(0,0,0,0.03);
+        z-index: 0;
+        pointer-events: none;
+        white-space: nowrap;
+        font-weight: 900;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto px-6 py-8 relative">
+    
+    <div class="mb-6 flex gap-4 no-print">
+        <button onclick="window.print()" class="bg-primary-dark text-white px-6 py-2 rounded-xl font-bold hover:bg-black transition flex items-center gap-2">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path>
+            </svg>
+            Print Result Card
+        </button>
+    </div>
+
+    <div class="glass-card p-10 bg-white relative overflow-hidden">
+        <div class="watermark uppercase">JAMIA AHSAN UL ULOOM</div>
+
+        <!-- Header -->
+        <div class="flex justify-between items-center mb-10 border-b-2 border-primary-dark pb-6">
+            <div class="flex items-center gap-4">
+                <img src="{% static 'academy/logo.png' %}" alt="Logo" class="h-20 w-auto">
+                <div>
+                    <h1 class="text-2xl font-black text-primary-dark">JAMIA AHSAN UL ULOOM</h1>
+                    <h2 class="text-xl font-bold text-primary-dark" style="font-family: 'Noto Nastaliq Urdu', serif;">جامعہ احسن العلوم</h2>
+                </div>
+            </div>
+            <div class="text-right">
+                <div class="bg-primary-dark text-white px-4 py-1 rounded-lg font-bold mb-2 inline-block">RESULT CARD</div>
+                <p class="text-primary-dark font-bold">Annual Examination {{ result.year }}</p>
+                <p class="text-primary-dark/70 text-sm">سالانہ امتحان {{ result.year }}</p>
+            </div>
+        </div>
+
+        <!-- Student Info -->
+        <div class="grid grid-cols-2 gap-8 mb-10 text-primary-dark">
+            <div class="space-y-2">
+                <p><strong>Name:</strong> {{ student.name_en }}</p>
+                <p class="font-bold Urdu-text">نام: <span class="text-xl">{{ student.name }}</span></p>
+                <p><strong>ID:</strong> {{ student.student_id }}</p>
+            </div>
+            <div class="space-y-2 text-right rtl">
+                <p><strong>Course:</strong> {{ student.course }}</p>
+                <p><strong>Class:</strong> {{ student.desired_class|default:"---" }}</p>
+            </div>
+        </div>
+
+        <!-- Marks Table -->
+        <table class="w-full text-center mb-10 result-table">
+            <thead>
+                <tr class="bg-gray-50 text-primary-dark font-bold">
+                    <th class="p-4 border">S.No</th>
+                    <th class="p-4 border text-left">Subject / مضمون</th>
+                    <th class="p-4 border">Total / کل</th>
+                    <th class="p-4 border">Obtained / حاصل کردہ</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for sub_name, marks in subjects.items %}
+                <tr>
+                    <td class="p-3 border">{{ forloop.counter }}</td>
+                    <td class="p-3 border text-left font-bold">{{ sub_name }}</td>
+                    <td class="p-3 border">100</td>
+                    <td class="p-3 border font-black text-lg">{{ marks }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+            <tfoot>
+                <tr class="bg-primary-dark text-white font-black text-lg">
+                    <td colspan="2" class="p-4 text-right">GRAND TOTAL</td>
+                    <td class="p-4 border border-white/20">{{ result.total_marks }}</td>
+                    <td class="p-4 border border-white/20">{{ result.obtained_marks }}</td>
+                </tr>
+            </tfoot>
+        </table>
+
+        <!-- Summary -->
+        <div class="grid grid-cols-3 gap-6 mb-12">
+            <div class="p-4 bg-gray-50 rounded-xl border border-primary-dark/10 text-center">
+                <p class="text-xs font-bold text-primary-dark/50 mb-1">PERCENTAGE</p>
+                <p class="text-2xl font-black text-primary-dark">{{ result.percentage|floatformat:1 }}%</p>
+            </div>
+            <div class="p-4 bg-gray-50 rounded-xl border border-primary-dark/10 text-center">
+                <p class="text-xs font-bold text-primary-dark/50 mb-1">GRADE / گریڈ</p>
+                <p class="text-2xl font-black text-primary-dark">{{ result.overall_grade }}</p>
+            </div>
+            <div class="p-4 bg-gray-50 rounded-xl border border-primary-dark/10 text-center">
+                <p class="text-xs font-bold text-primary-dark/50 mb-1">STATUS</p>
+                <p class="text-2xl font-black {% if result.percentage >= 50 %}text-success{% else %}text-red-600{% endif %}">
+                    {% if result.percentage >= 50 %}PASS / کامیاب{% else %}FAIL / ناکام{% endif %}
+                </p>
+            </div>
+        </div>
+
+        <!-- Footer Signatures -->
+        <div class="flex justify-between items-end mt-16 pt-8 border-t border-dashed border-primary-dark/20 text-primary-dark text-sm font-bold">
+            <div class="text-center w-40">
+                <div class="border-b border-primary-dark h-8 mb-2"></div>
+                <p>Controller of Exams</p>
+            </div>
+            <div class="text-center w-40">
+                <div class="border-b border-primary-dark h-8 mb-2"></div>
+                <p>Principal / مہتمم</p>
+            </div>
+            <div class="text-center w-40">
+                <div class="border-b border-primary-dark h-8 mb-2"></div>
+                <p>Date: {% now "d/m/Y" %}</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

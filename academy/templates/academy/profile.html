@@ -1,0 +1,247 @@
+{% extends 'academy/base.html' %}
+{% load static %}
+
+{% block title %}Profile | {{ student.name }}{% endblock %}
+
+{% block content %}
+<div class="max-w-[1000px] mx-auto px-6 py-8">
+
+    <div class="mb-6 flex gap-4 no-print">
+        <a href="{% url 'academy:dashboard' %}"
+            class="bg-white/50 border border-primary-dark/20 text-primary-dark px-4 py-2 rounded-xl hover:bg-white transition flex items-center gap-2 font-semibold shadow-sm">
+            <span class="rtl:hidden">&larr;</span><span class="ltr:hidden">&rarr;</span> <span data-en="Back to Dashboard" data-ur="ڈیش بورڈ پر واپس">Back to Dashboard</span>
+        </a>
+        <a href="{% url 'academy:directory' %}"
+            class="bg-white/50 border border-primary-dark/20 text-primary-dark px-4 py-2 rounded-xl hover:bg-white transition flex items-center gap-2 font-semibold shadow-sm">
+            <span class="rtl:hidden">&larr;</span><span class="ltr:hidden">&rarr;</span> <span data-en="Back to Directory" data-ur="ڈائریکٹری پر واپس">Back to Directory</span>
+        </a>
+    </div>
+
+    <!-- Main Profile Card -->
+    <div class="glass-card overflow-hidden">
+        <!-- Header Ribbon -->
+        <div class="h-32 bg-gradient-to-r from-primary-dark to-primary-teal relative">
+            <div class="absolute inset-0 opacity-10"
+                style="background-image: url('{% static 'images/official_logo.jpg' %}'); background-repeat: repeat; background-size: 80px; filter: grayscale(100%);">
+            </div>
+        </div>
+
+        <div class="px-8 pb-8 relative">
+            <!-- Avatar Overlay -->
+            <div class="absolute -top-16 ltr:left-8 rtl:right-8">
+                <div
+                    class="w-32 h-32 rounded-full border-4 border-bg-beige bg-accent-gold text-primary-dark flex items-center justify-center text-5xl font-black shadow-xl">
+                    {{ student.name.0 }}
+                </div>
+            </div>
+
+            <!-- Header Info -->
+            <div class="ltr:ml-40 rtl:mr-40 pt-4 flex justify-between items-start">
+                <div>
+                    <h1 class="text-3xl font-black text-primary-dark leading-tight" 
+                        data-en="{{ student.name_en|default:student.name }}" 
+                        data-ur="{{ student.name }}">
+                        {{ student.name_en|default:student.name }}</h1>
+                    <div class="text-primary-dark/60 font-semibold tracking-wider flex items-center gap-2 mt-2">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M10 6H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V8a2 2 0 00-2-2h-5m-4 0V5a2 2 0 114 0v1m-4 0a2 2 0 104 0m-5 8a2 2 0 100-4 2 2 0 000 4zm0 0c1.306 0 2.417.835 2.83 2M9 14a3.001 3.001 0 00-2.83 2M15 11h3m-3 4h2">
+                            </path>
+                        </svg>
+                        {{ student.student_id }} &bull; {{ student.course }}
+                    </div>
+                </div>
+
+                <a href="{% url 'academy:admission_receipt' student.student_id %}" target="_blank"
+                    class="bg-primary-dark text-beige px-4 py-2 rounded-xl flex items-center gap-2 hover:bg-primary-teal transition shadow-lg no-print">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z">
+                        </path>
+                    </svg>
+                    <span data-en="Print Profile" data-ur="پروفائل پرنٹ کریں">Print Profile</span>
+                </a>
+                <a href="{% url 'academy:student_edit' student.student_id %}" 
+                    class="bg-white/50 border border-primary-dark/20 text-primary-dark px-4 py-2 rounded-xl flex items-center gap-2 hover:bg-white transition shadow-lg no-print">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                    </svg>
+                    <span data-en="Edit Profile" data-ur="پروفائل تبدیل کریں">Edit Profile</span>
+                </a>
+                <a href="{% url 'academy:result_bulk_entry' %}?course={{ student.course|urlencode }}&class_name={{ student.desired_class|urlencode }}&year=2024" 
+                    class="bg-white/50 border border-primary-dark/20 text-primary-dark px-4 py-2 rounded-xl flex items-center gap-2 hover:bg-white transition shadow-lg no-print">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                    </svg>
+                    <span data-en="View/Enter Result" data-ur="رزلٹ دیکھیں/درج کریں">Result</span>
+                </a>
+            </div>
+
+            <hr class="my-8 border-primary-dark/10">
+
+            <div class="grid grid-cols-1 gap-8">
+
+                <!-- ===== PERSONAL DETAILS ===== -->
+
+                <div>
+                    <h3 class="font-bold text-lg text-primary-dark mb-4 ltr:border-l-4 rtl:border-r-4 border-accent-gold ltr:pl-3 rtl:pr-3" data-en="Personal Details" data-ur="ذاتی تفصیلات">Personal Details</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        <div class="bg-white/40 p-3 rounded-lg border border-white/60">
+                            <div class="text-xs text-primary-dark/50 uppercase tracking-wider font-semibold" data-en="Full Name" data-ur="مکمل نام">Full Name</div>
+                            <div class="font-bold text-primary-dark" 
+                                data-en="{{ student.name_en|default:student.name }}" 
+                                data-ur="{{ student.name }}">
+                                {{ student.name_en|default:student.name }}</div>
+                        </div>
+                        <div class="bg-white/40 p-3 rounded-lg border border-white/60">
+                            <div class="text-xs text-primary-dark/50 uppercase tracking-wider font-semibold" data-en="Guardian Name" data-ur="سرپرست کا نام">Guardian Name</div>
+                            <div class="font-bold text-primary-dark">{{ student.guardian_name }}</div>
+                        </div>
+                        <div class="bg-white/40 p-3 rounded-lg border border-white/60">
+                            <div class="text-xs text-primary-dark/50 uppercase tracking-wider font-semibold" data-en="Guardian Relation" data-ur="سرپرست کا طالبہ سے رشتہ">Guardian Relation</div>
+                            <div class="font-bold text-primary-dark">{{ student.guardian_relation|default:"—" }}</div>
+                        </div>
+                        <div class="bg-white/40 p-3 rounded-lg border border-white/60">
+                            <div class="text-xs text-primary-dark/50 uppercase tracking-wider font-semibold" data-en="Date of Birth" data-ur="تاریخ پیدائش">Date of Birth</div>
+                            <div class="font-bold text-primary-dark">{{ student.date_of_birth|date:"F j, Y"|default:"—" }}</div>
+                        </div>
+                        <div class="bg-white/40 p-3 rounded-lg border border-white/60">
+                            <div class="text-xs text-primary-dark/50 uppercase tracking-wider font-semibold" data-en="Father CNIC" data-ur="والد کا شناختی کارڈ نمبر">Father CNIC</div>
+                            <div class="font-bold text-primary-dark">{{ student.father_cnic|default:"—" }}</div>
+                        </div>
+                        <div class="bg-white/40 p-3 rounded-lg border border-white/60">
+                            <div class="text-xs text-primary-dark/50 uppercase tracking-wider font-semibold" data-en="Contact Number" data-ur="رابطہ نمبر">Contact Number</div>
+                            <div class="font-bold text-primary-dark">{{ student.contact_number }}</div>
+                        </div>
+                        <div class="bg-white/40 p-3 rounded-lg border border-white/60">
+                            <div class="text-xs text-primary-dark/50 uppercase tracking-wider font-semibold" data-en="Enrollment Date" data-ur="داخلے کی تاریخ">Enrollment Date</div>
+                            <div class="font-bold text-primary-dark">{{ student.enrollment_date|date:"F j, Y" }}</div>
+                        </div>
+                        <div class="bg-white/40 p-3 rounded-lg border border-white/60 md:col-span-2 lg:col-span-3">
+                            <div class="text-xs text-primary-dark/50 uppercase tracking-wider font-semibold" data-en="Address" data-ur="پتہ">Address</div>
+                            <div class="font-bold text-primary-dark">{{ student.address }}</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ===== ACADEMIC DETAILS ===== -->
+                <div>
+                    <h3 class="font-bold text-lg text-primary-dark mb-4 ltr:border-l-4 rtl:border-r-4 border-accent-gold ltr:pl-3 rtl:pr-3" data-en="Academic Details" data-ur="تعلیمی تفصیلات">Academic Details</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        <div class="bg-white/40 p-3 rounded-lg border border-white/60">
+                            <div class="text-xs text-primary-dark/50 uppercase tracking-wider font-semibold" data-en="Course" data-ur="کورس">Course</div>
+                            <div class="font-bold text-primary-dark">{{ student.course }}</div>
+                        </div>
+                        <div class="bg-white/40 p-3 rounded-lg border border-white/60">
+                            <div class="text-xs text-primary-dark/50 uppercase tracking-wider font-semibold" data-en="Desired Class" data-ur="مطلوبہ درجہ">Desired Class</div>
+                            <div class="font-bold text-primary-dark">{{ student.desired_class|default:"—" }}</div>
+                        </div>
+                        <div class="bg-white/40 p-3 rounded-lg border border-white/60">
+                            <div class="text-xs text-primary-dark/50 uppercase tracking-wider font-semibold" data-en="First Class in Jamia" data-ur="جامعہ میں پہلا درجہ">First Class in Jamia</div>
+                            <div class="font-bold text-primary-dark">{{ student.first_class_in_jamia|default:"—" }}</div>
+                        </div>
+                        <div class="bg-white/40 p-3 rounded-lg border border-white/60">
+                            <div class="text-xs text-primary-dark/50 uppercase tracking-wider font-semibold" data-en="Wifaq Reg. No." data-ur="وفاق المدارس رقم التسجیل">Wifaq Reg. No.</div>
+                            <div class="font-bold text-primary-dark">{{ student.wifaq_registration_number|default:"—" }}</div>
+                        </div>
+                        <div class="bg-white/40 p-3 rounded-lg border border-white/60">
+                            <div class="text-xs text-primary-dark/50 uppercase tracking-wider font-semibold" data-en="Roll Number" data-ur="رقم الجلوس">Roll Number</div>
+                            <div class="font-bold text-primary-dark">{{ student.roll_number|default:"—" }}</div>
+                        </div>
+                        <div class="bg-white/40 p-3 rounded-lg border border-white/60">
+                            <div class="text-xs text-primary-dark/50 uppercase tracking-wider font-semibold" data-en="Duration of Education" data-ur="مدت تعلیم">Duration of Education</div>
+                            <div class="font-bold text-primary-dark">{{ student.duration_of_education|default:"—" }}</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ===== DEPARTURE DETAILS ===== -->
+                <div>
+                    <h3 class="font-bold text-lg text-primary-dark mb-4 ltr:border-l-4 rtl:border-r-4 border-accent-gold ltr:pl-3 rtl:pr-3" data-en="Departure Details" data-ur="اخراج کی تفصیلات">Departure Details</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div class="bg-white/40 p-3 rounded-lg border border-white/60">
+                            <div class="text-xs text-primary-dark/50 uppercase tracking-wider font-semibold" data-en="Left Class/Year" data-ur="کونسے درجے/سال میں چلی گئی">Left Class/Year</div>
+                            <div class="font-bold text-primary-dark">{{ student.left_class_year|default:"—" }}</div>
+                        </div>
+                        <div class="bg-white/40 p-3 rounded-lg border border-white/60">
+                            <div class="text-xs text-primary-dark/50 uppercase tracking-wider font-semibold" data-en="Returned to Class" data-ur="واپس کونسے درجہ میں آئی">Returned to Class</div>
+                            <div class="font-bold text-primary-dark">{{ student.returned_to_class|default:"—" }}</div>
+                        </div>
+                        <div class="bg-white/40 p-3 rounded-lg border border-white/60">
+                            <div class="text-xs text-primary-dark/50 uppercase tracking-wider font-semibold" data-en="Date of Leaving" data-ur="تاریخ اخراج">Date of Leaving</div>
+                            <div class="font-bold text-primary-dark">{{ student.date_of_leaving|date:"F j, Y"|default:"—" }}</div>
+                        </div>
+                        <div class="bg-white/40 p-3 rounded-lg border border-white/60">
+                            <div class="text-xs text-primary-dark/50 uppercase tracking-wider font-semibold" data-en="Reason for Leaving" data-ur="وجہ اخراج">Reason for Leaving</div>
+                            <div class="font-bold text-primary-dark">{{ student.reason_for_leaving|default:"—" }}</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ===== ATTENDANCE HISTORY ===== -->
+                <div class="mt-8">
+                    <h3 class="font-bold text-lg text-primary-dark mb-4 ltr:border-l-4 rtl:border-r-4 border-accent-gold ltr:pl-3 rtl:pr-3" data-en="Attendance History" data-ur="حاضری کی تاریخ">Attendance History</h3>
+                    
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+                        <div class="bg-success/10 border border-success/20 p-4 rounded-xl text-center">
+                            <div class="text-xs text-success/70 font-bold uppercase tracking-wider mb-1" data-en="Present" data-ur="حاضر">Present</div>
+                            <div class="text-2xl font-black text-success">{{ summary.present }}</div>
+                        </div>
+                        <div class="bg-error/10 border border-error/20 p-4 rounded-xl text-center">
+                            <div class="text-xs text-error/70 font-bold uppercase tracking-wider mb-1" data-en="Absent" data-ur="غیر حاضر">Absent</div>
+                            <div class="text-2xl font-black text-error">{{ summary.absent }}</div>
+                        </div>
+                        <div class="bg-warning/10 border border-warning/20 p-4 rounded-xl text-center">
+                            <div class="text-xs text-warning/70 font-bold uppercase tracking-wider mb-1" data-en="Leave" data-ur="رخصت">Leave</div>
+                            <div class="text-2xl font-black text-warning">{{ summary.leave }}</div>
+                        </div>
+                        <div class="bg-primary-dark/10 border border-primary-dark/20 p-4 rounded-xl text-center">
+                            <div class="text-xs text-primary-dark/70 font-bold uppercase tracking-wider mb-1" data-en="Total" data-ur="کل">Total</div>
+                            <div class="text-2xl font-black text-primary-dark">{{ summary.total }}</div>
+                        </div>
+                    </div>
+
+                    <div class="glass-card overflow-hidden">
+                        <table class="w-full text-left rtl:text-right border-collapse text-sm">
+                            <thead class="bg-primary-dark/5 text-primary-dark/70 text-[10px] font-bold uppercase tracking-wider">
+                                <tr>
+                                    <th class="px-6 py-3" data-en="Date" data-ur="تاریخ">Date</th>
+                                    <th class="px-6 py-3" data-en="Status" data-ur="حالت">Status</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-primary-dark/10">
+                                {% for record in attendance_records %}
+                                <tr class="hover:bg-primary-dark/5 transition-colors">
+                                    <td class="px-6 py-3 font-semibold text-primary-dark">{{ record.date|date:"F j, Y" }}</td>
+                                    <td class="px-6 py-3">
+                                        {% if record.status == 'Present' %}
+                                            <span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded text-[10px] font-bold bg-success/10 text-success uppercase">
+                                                <span class="w-1.5 h-1.5 rounded-full bg-success"></span> Present
+                                            </span>
+                                        {% elif record.status == 'Absent' %}
+                                            <span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded text-[10px] font-bold bg-error/10 text-error uppercase">
+                                                <span class="w-1.5 h-1.5 rounded-full bg-error"></span> Absent
+                                            </span>
+                                        {% else %}
+                                            <span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded text-[10px] font-bold bg-warning/10 text-warning uppercase">
+                                                <span class="w-1.5 h-1.5 rounded-full bg-warning"></span> Leave
+                                            </span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="2" class="px-6 py-8 text-center text-primary-dark/40 italic" data-en="No attendance records found." data-ur="حاضری کا کوئی ریکارڈ نہیں ملا۔">No attendance records found.</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+</div>
+{% endblock %}

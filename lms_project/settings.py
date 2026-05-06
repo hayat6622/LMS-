@@ -13,6 +13,8 @@ https://docs.djangoproject.com/en/6.0/ref/settings/
 import os
 import dj_database_url
 from pathlib import Path
+import firebase_admin
+from firebase_admin import credentials, firestore
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -86,14 +88,27 @@ WSGI_APPLICATION = 'lms_project.wsgi.application'
 
 
 # Database
-# https://docs.djangoproject.com/en/6.0/ref/settings/#databases
+# Using in-memory SQLite for Django's internal tables (Auth, Sessions, etc.)
+# because the user wants to remove file-based SQLite and use Firebase for app data.
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': ':memory:',
+    }
+}
 
-# DATABASES = {
-#     'default': dj_database_url.config(
-#         default=f"sqlite:///{BASE_DIR / 'db.sqlite3'}",
-#         conn_max_age=600
-#     )
-# }
+# Firebase Initialization
+FIREBASE_KEY_PATH = os.path.join(BASE_DIR, 'firebase-key.json')
+
+if os.path.exists(FIREBASE_KEY_PATH):
+    cred = credentials.Certificate(FIREBASE_KEY_PATH)
+    firebase_admin.initialize_app(cred)
+else:
+    # If no key file, we can initialize with default credentials or just log a warning
+    # For now, let's just initialize if the file exists to avoid crashing.
+    print("Warning: firebase-key.json not found. Firestore features will not work.")
+
+db = firestore.client() if firebase_admin._apps else None
 
 
 # Password validation

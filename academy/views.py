@@ -3,18 +3,28 @@ from django.contrib import messages
 from .models import Student, Staff, Attendance, LeaveRequest, Result, Subject
 from .forms import AdmissionForm, SubjectForm
 from django.db.models import Sum, Q
+from . import firebase_utils
 
 def dashboard(request):
-    students = Student.objects.all()
-    staff = Staff.objects.all()
-    pending_leaves = LeaveRequest.objects.filter(status='Pending').count()
+    # Fetch from Firestore instead of SQLite
+    students = firebase_utils.list_documents('students')
+    staff = firebase_utils.list_documents('staff')
     
-    total_sahib = students.filter(is_sahib_tarteeb=True).count()
+    # Example of filtering in Firestore (manual for now, or using queries)
+    # For count, we can just take length of list or use Firestore count queries
+    total_students = len(students)
+    total_staff = len(staff)
+    
+    # Fetch pending leaves
+    leaves_ref = firebase_utils.get_collection('leave_requests')
+    pending_leaves_count = len([d for d in firebase_utils.list_documents('leave_requests') if d.get('status') == 'Pending'])
+    
+    total_sahib = len([s for s in students if s.get('is_sahib_tarteeb')])
     
     context = {
-        'total_students': students.count(),
-        'total_staff': staff.count(),
-        'pending_leaves': pending_leaves,
+        'total_students': total_students,
+        'total_staff': total_staff,
+        'pending_leaves': pending_leaves_count,
         'total_sahib': total_sahib,
     }
     return render(request, 'academy/dashboard.html', context)

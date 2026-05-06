@@ -83,6 +83,31 @@ html[dir="rtl"] body {
 .bg-primary-dark { background-color: var(--primary-dark); }
 .border-gold-opacity { border-color: rgba(212, 175, 55, 0.2); }
 
+.Urdu-text {
+  font-family: 'Noto Nastaliq Urdu', serif;
+}
+
+/* Print Styles */
+@media print {
+  .no-print {
+    display: none !important;
+  }
+  
+  body {
+    background-color: white !important;
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+  
+  .glass-card {
+    border: none !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    transform: none !important;
+    backdrop-filter: none !important;
+  }
+}
+
 /* Header logo area text in RTL */
 [dir="rtl"] header .text-2xl {
   font-family: 'Noto Nastaliq Urdu', sans-serif;

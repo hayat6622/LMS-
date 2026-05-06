@@ -21,6 +21,14 @@
                     <option value="2023" {% if year == '2023' %}selected{% endif %}>2023</option>
                 </select>
             </div>
+            <div class="flex flex-col gap-1">
+                <label class="text-xs font-bold text-primary-dark/60 ml-2" data-en="Exam Type" data-ur="امتحان کی قسم">Exam Type</label>
+                <select name="exam_type" class="bg-white border border-primary-dark/20 rounded-xl px-4 py-2 text-primary-dark font-medium">
+                    {% for val, label in exam_type_choices %}
+                    <option value="{{ val }}" {% if exam_type == val %}selected{% endif %}>{{ label }}</option>
+                    {% endfor %}
+                </select>
+            </div>
             <div class="flex flex-col gap-1" id="course-filter-group">
                 <label class="text-xs font-bold text-primary-dark/60 ml-2" data-en="Course" data-ur="شعبہ">Course</label>
                 <select name="course" id="course-select" class="bg-white border border-primary-dark/20 rounded-xl px-4 py-2 text-primary-dark font-medium">
@@ -51,28 +59,50 @@
     </div>
 
     {% block extra_js %}
+    {{ kutub_classes|json_script:"kutub-classes-data" }}
+    {{ general_classes|json_script:"general-classes-data" }}
     <script>
         (function() {
             const courseSelect = document.getElementById('course-select');
+            const classSelect = document.getElementById('class-select');
             const classGroup = document.getElementById('class-filter-group');
 
-            function toggleClassVisibility() {
+            const kutubClassesData = JSON.parse(document.getElementById('kutub-classes-data').textContent);
+            const kutubClasses = kutubClassesData.map(item => ({val: item[0], label: item[1]}));
+
+            const numericClassesData = JSON.parse(document.getElementById('general-classes-data').textContent);
+            const numericClasses = numericClassesData.map(item => ({val: item[0], label: item[1]}));
+
+            function updateClassOptions() {
                 const val = courseSelect.value;
-                if (val === 'شعبہ بنین' || val === 'شعبہ حفظ و ناظرہ') {
-                    classGroup.style.display = 'none';
-                    document.getElementById('class-select').value = '';
-                } else {
-                    classGroup.style.display = 'flex';
+                const currentClass = classSelect.value;
+
+                // Clear current options (except empty)
+                while (classSelect.options.length > 1) {
+                    classSelect.remove(1);
                 }
+
+                let optionsToAdd = [];
+                if (val === 'شعبہ کتب') {
+                    optionsToAdd = kutubClasses;
+                } else if (val === 'شعبہ بنین' || val === 'شعبہ حفظ و ناظرہ') {
+                    optionsToAdd = numericClasses;
+                }
+
+                optionsToAdd.forEach(opt => {
+                    const option = new Option(opt.label, opt.val);
+                    if (opt.val === currentClass) option.selected = true;
+                    classSelect.add(option);
+                });
             }
 
-            courseSelect.addEventListener('change', toggleClassVisibility);
-            toggleClassVisibility();
+            courseSelect.addEventListener('change', updateClassOptions);
+            updateClassOptions();
         })();
     </script>
     {% endblock %}
 
-    {% if not course or not class_name and course == 'شعبہ کتب' %}
+    {% if not course or not class_name %}
     <div class="glass-card p-12 text-center">
         <div class="w-16 h-16 bg-primary-dark/5 rounded-full flex items-center justify-center mx-auto mb-4">
             <svg class="w-8 h-8 text-primary-dark/30" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -130,7 +160,7 @@
                     </tr>
                     {% empty %}
                     <tr>
-                        <td colspan="{{ subjects.count|add:1 }}" class="p-8 text-center text-primary-dark/50" data-en="No students found in this class." data-ur="اس درجے میں کوئی طالب علم نہیں ہے۔">No students found in this class.</td>
+                        <td colspan="{{ subjects|length|add:1 }}" class="p-8 text-center text-primary-dark/50" data-en="No students found in this class." data-ur="اس درجے میں کوئی طالب علم نہیں ہے۔">No students found in this class.</td>
                     </tr>
                     {% endfor %}
                 </tbody>

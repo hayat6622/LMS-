@@ -6,19 +6,23 @@
 {% block content %}
 <div class="max-w-6xl mx-auto px-6 py-8">
     <div class="mb-8">
-        <h1 class="text-primary-dark text-3xl font-bold" data-en="Manage Subjects" data-ur="مضامین کی ترتیب">Manage Subjects</h1>
-        <p class="text-primary-dark/60 mt-1" data-en="Define subjects for each course and class level." data-ur="ہر شعبے اور درجے کے لیے مضامین ترتیب دیں۔">Define subjects for each course and class level.</p>
+        <h1 class="text-primary-dark text-3xl font-bold" data-en="Manage Subjects" data-ur="مضامین کی ترتیب">Manage
+            Subjects</h1>
+        <p class="text-primary-dark/60 mt-1" data-en="Define subjects for each course and class level."
+            data-ur="ہر شعبے اور درجے کے لیے مضامین ترتیب دیں۔">Define subjects for each course and class level.</p>
     </div>
 
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
         <!-- Add Subject Form -->
         <div class="lg:col-span-1">
             <div class="glass-card p-6 sticky top-8">
-                <h2 class="text-xl font-bold text-primary-dark mb-4" data-en="Add New Subject" data-ur="نیا مضمون شامل کریں">Add New Subject</h2>
+                <h2 class="text-xl font-bold text-primary-dark mb-4" data-en="Add New Subject"
+                    data-ur="نیا مضمون شامل کریں">Add New Subject</h2>
                 <form method="post">
                     {% csrf_token %}
                     {{ form|crispy }}
-                    <button type="submit" class="w-full bg-accent-gold hover:bg-accent-light text-primary-dark font-bold py-3 rounded-xl transition shadow-lg mt-4 cursor-pointer">
+                    <button type="submit"
+                        class="w-full bg-accent-gold hover:bg-accent-light text-primary-dark font-bold py-3 rounded-xl transition shadow-lg mt-4 cursor-pointer">
                         <span data-en="Save Subject" data-ur="محفوظ کریں">Save Subject</span>
                     </button>
                 </form>
@@ -28,12 +32,13 @@
         <!-- Subjects List -->
         <div class="lg:col-span-2">
             <div class="glass-card overflow-hidden">
-                <table class="w-full text-left border-collapse">
+                <table class="w-full ltr:text-left rtl:text-right border-collapse">
                     <thead>
                         <tr class="bg-primary-dark text-white">
                             <th class="p-4" data-en="Subject" data-ur="مضمون">Subject</th>
                             <th class="p-4" data-en="Course" data-ur="شعبہ">Course</th>
                             <th class="p-4" data-en="Class" data-ur="درجہ">Class</th>
+                            <th class="p-4" data-en="Teacher" data-ur="استاد">Teacher</th>
                             <th class="p-4" data-en="Marks" data-ur="نمبر">Marks</th>
                         </tr>
                     </thead>
@@ -43,11 +48,14 @@
                             <td class="p-4 font-bold text-primary-dark">{{ subject.name }}</td>
                             <td class="p-4 text-primary-dark/70">{{ subject.course }}</td>
                             <td class="p-4 text-primary-dark/70">{{ subject.class_name|default:"---" }}</td>
+                            <td class="p-4 text-primary-dark/70">{{ subject.teacher.name|default:"---" }}</td>
                             <td class="p-4 text-primary-dark/70">{{ subject.total_marks }}</td>
                         </tr>
                         {% empty %}
                         <tr>
-                            <td colspan="4" class="p-8 text-center text-primary-dark/50" data-en="No subjects defined yet." data-ur="کوئی مضمون موجود نہیں ہے۔">No subjects defined yet.</td>
+                            <td colspan="4" class="p-8 text-center text-primary-dark/50"
+                                data-en="No subjects defined yet." data-ur="کوئی مضمون موجود نہیں ہے۔">No subjects
+                                defined yet.</td>
                         </tr>
                         {% endfor %}
                     </tbody>
@@ -60,22 +68,52 @@
 
 {% block extra_js %}
 <script>
-    (function() {
+    (function () {
         const courseSelect = document.getElementById('id_course');
+        const classSelect = document.getElementById('id_class_name');
         const classFieldWrapper = document.getElementById('div_id_class_name');
 
-        function toggleClassVisibility() {
-            const val = courseSelect.value;
-            if (val === 'شعبہ بنین' || val === 'شعبہ حفظ و ناظرہ') {
-                classFieldWrapper.style.display = 'none';
-                document.getElementById('id_class_name').value = '';
-            } else {
-                classFieldWrapper.style.display = 'block';
-            }
-        }
+        const kutubClasses = [
+            {% for val, label in form.fields.class_name.choices %}
+                    {% if val in "درجہ اولیٰ،درجہ ثانیہ،درجہ ثالثہ،درجہ رابعہ،درجہ خامسہ،درجہ سادسہ،درجہ سابعہ" %}
+    { val: "{{ val }}", label: "{{ label }}" },
+    {% endif %}
+    {% endfor %}
+            ];
 
-        courseSelect.addEventListener('change', toggleClassVisibility);
-        toggleClassVisibility(); // Run on load
-    })();
+    const numericClasses = [
+        {% for val, label in form.fields.class_name.choices %}
+    {% if val in "1,2,3,4,5,6,7" %}
+    { val: "{{ val }}", label: "{{ label }}" },
+    {% endif %}
+    {% endfor %}
+            ];
+
+    function updateClassOptions() {
+        const val = courseSelect.value;
+        const currentClass = classSelect.value;
+
+        if (val === 'شعبہ کتب') {
+            classFieldWrapper.style.display = 'block';
+
+            // Clear current options (except empty)
+            while (classSelect.options.length > 1) {
+                classSelect.remove(1);
+            }
+
+            kutubClasses.forEach(opt => {
+                const option = new Option(opt.label, opt.val);
+                if (opt.val === currentClass) option.selected = true;
+                classSelect.add(option);
+            });
+        } else {
+            classFieldWrapper.style.display = 'none';
+            classSelect.value = '';
+        }
+    }
+
+    courseSelect.addEventListener('change', updateClassOptions);
+    updateClassOptions();
+        }) ();
 </script>
 {% endblock %}

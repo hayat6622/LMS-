@@ -1,0 +1,172 @@
+{% extends 'academy/base.html' %}
+{% load static %}
+
+{% block title %}Class Gazette | Jamia Ahsan ul uloom Mardan{% endblock %}
+
+{% block content %}
+<div class="max-w-[1400px] mx-auto px-6 py-8">
+
+    <div class="mb-6 flex justify-between items-center no-print">
+        <a href="{% url 'academy:dashboard' %}"
+            class="bg-white/50 border border-primary-dark/20 text-primary-dark px-4 py-2 rounded-xl hover:bg-white transition flex items-center gap-2 font-semibold shadow-sm">
+            <span class="rtl:hidden">&larr;</span><span class="ltr:hidden">&rarr;</span> <span data-en="Back to Dashboard" data-ur="ڈیش بورڈ پر واپس">Back to Dashboard</span>
+        </a>
+        
+        <button onclick="window.print()" class="bg-primary-dark text-beige px-6 py-2 rounded-xl flex items-center gap-2 hover:bg-primary-teal transition font-bold shadow-lg">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path>
+            </svg>
+            <span data-en="Print Gazette" data-ur="گزٹ پرنٹ کریں">Print Gazette</span>
+        </button>
+    </div>
+
+    <!-- Filter Form (No Print) -->
+    <div class="glass-card p-6 mb-8 no-print">
+        <form method="GET" class="grid grid-cols-1 md:grid-cols-5 gap-4 items-end">
+            <div>
+                <label class="block text-xs font-bold text-primary-dark/60 uppercase mb-1" data-en="Department" data-ur="شعبہ">Department</label>
+                <select name="course" class="w-full bg-white border border-primary-dark/20 rounded-lg p-2 focus:ring-2 focus:ring-accent-gold">
+                    <option value="">---</option>
+                    {% for val, label in course_choices %}
+                        <option value="{{ val }}" {% if course == val %}selected{% endif %}>{{ label }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div>
+                <label class="block text-xs font-bold text-primary-dark/60 uppercase mb-1" data-en="Class" data-ur="درجہ">Class</label>
+                <select name="class_name" class="w-full bg-white border border-primary-dark/20 rounded-lg p-2 focus:ring-2 focus:ring-accent-gold">
+                    <option value="">---</option>
+                    {% for val, label in class_choices %}
+                        <option value="{{ val }}" {% if class_name == val %}selected{% endif %}>{{ label }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div>
+                <label class="block text-xs font-bold text-primary-dark/60 uppercase mb-1" data-en="Year" data-ur="سال">Year</label>
+                <input type="text" name="year" value="{{ year }}" class="w-full bg-white border border-primary-dark/20 rounded-lg p-2">
+            </div>
+            <div>
+                <label class="block text-xs font-bold text-primary-dark/60 uppercase mb-1" data-en="Exam Type" data-ur="امتحان کی قسم">Exam Type</label>
+                <select name="exam_type" class="w-full bg-white border border-primary-dark/20 rounded-lg p-2">
+                    {% for val, label in exam_type_choices %}
+                        <option value="{{ val }}" {% if exam_type == val %}selected{% endif %}>{{ label }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <button type="submit" class="bg-accent-gold text-primary-dark font-bold py-2 rounded-lg hover:bg-accent-light transition">
+                <span data-en="Load Results" data-ur="نتائج لوڈ کریں">Load Results</span>
+            </button>
+        </form>
+    </div>
+
+    <!-- Print Header -->
+    <div class="hidden print:block text-center mb-8">
+        <div class="flex items-center justify-center gap-4 mb-4">
+            <img src="{% static 'images/official_logo.jpg' %}" class="w-20 h-20">
+            <div class="text-right">
+                <h1 class="text-3xl font-bold text-primary-dark">جامعہ احسن العلوم مردان</h1>
+                <p class="text-xl font-bold text-primary-dark/80">Jamia Ahsan ul uloom Mardan</p>
+            </div>
+        </div>
+        <div class="h-1 bg-primary-dark w-full mb-4"></div>
+        <h2 class="text-2xl font-bold">
+            {% if course %}{{ course }} - {% endif %}
+            {% if class_name %}{{ class_name }} - {% endif %}
+            گزٹ ({{ exam_type }} {{ year }})
+        </h2>
+    </div>
+
+    {% if results %}
+    <div class="glass-card overflow-hidden shadow-2xl print:shadow-none print:border-none">
+        <div class="overflow-x-auto">
+            <table class="w-full text-sm ltr:text-left rtl:text-right border-collapse">
+                <thead>
+                    <tr class="bg-primary-dark text-beige">
+                        <th class="p-4 border border-white/10" rowspan="2">#</th>
+                        <th class="p-4 border border-white/10" rowspan="2" data-en="Student ID" data-ur="رول نمبر">Roll No</th>
+                        <th class="p-4 border border-white/10" rowspan="2" data-en="Name" data-ur="نام طالبہ">Name</th>
+                        <th class="p-2 border border-white/10 text-center" colspan="{{ subjects|length }}" data-en="Subjects" data-ur="مضامین">Subjects</th>
+                        <th class="p-4 border border-white/10" rowspan="2" data-en="Obtained" data-ur="حاصل کردہ">Obtained</th>
+                        <th class="p-4 border border-white/10" rowspan="2" data-en="Total" data-ur="کل نمبر">Total</th>
+                        <th class="p-4 border border-white/10" rowspan="2" data-en="%" data-ur="فیصد">%</th>
+                        <th class="p-4 border border-white/10" rowspan="2" data-en="Pos." data-ur="پوزیشن">Pos.</th>
+                    </tr>
+                    <tr class="bg-primary-teal text-beige text-[10px]">
+                        {% for sub in subjects %}
+                            <th class="p-2 border border-white/10 text-center whitespace-nowrap">{{ sub }}</th>
+                        {% endfor %}
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for r in results %}
+                    <tr class="border-b border-primary-dark/10 hover:bg-accent-gold/5 transition-colors {% if r.position == 1 %}bg-accent-gold/10{% endif %}">
+                        <td class="p-4 border border-primary-dark/5">{{ forloop.counter }}</td>
+                        <td class="p-4 border border-primary-dark/5 font-mono font-bold">{{ r.student.student_id }}</td>
+                        <td class="p-4 border border-primary-dark/5 font-bold">
+                             <div data-en="{{ r.student.name_en|default:r.student.name }}" data-ur="{{ r.student.name }}">
+                                {{ r.student.name_en|default:r.student.name }}
+                             </div>
+                        </td>
+                        {% for mark in r.marks_list %}
+                            <td class="p-2 border border-primary-dark/5 text-center font-bold {% if mark < 50 and mark != '-' %}text-red-600{% endif %}">{{ mark }}</td>
+                        {% endfor %}
+                        <td class="p-4 border border-primary-dark/5 font-black text-primary-dark">{{ r.obtained_marks }}</td>
+                        <td class="p-4 border border-primary-dark/5 font-bold">{{ r.total_marks }}</td>
+                        <td class="p-4 border border-primary-dark/5 font-bold text-accent-dark">{{ r.percentage }}%</td>
+                        <td class="p-4 border border-primary-dark/5">
+                            {% if r.position == 1 %}
+                                <span class="bg-accent-gold text-primary-dark px-2 py-1 rounded text-xs font-black">1st</span>
+                            {% elif r.position == 2 %}
+                                <span class="bg-silver/40 text-primary-dark px-2 py-1 rounded text-xs font-black">2nd</span>
+                            {% elif r.position == 3 %}
+                                <span class="bg-bronze/40 text-primary-dark px-2 py-1 rounded text-xs font-black">3rd</span>
+                            {% else %}
+                                <span class="font-bold text-primary-dark/60">{{ r.position }}</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    
+    <!-- Class Summary -->
+    <div class="mt-8 grid grid-cols-1 md:grid-cols-3 gap-6 no-print">
+        <div class="glass-card p-6 bg-primary-dark text-beige">
+            <div class="text-xs font-bold opacity-70 uppercase tracking-widest mb-1">Class Average</div>
+            <div class="text-3xl font-black">-- %</div>
+        </div>
+        <div class="glass-card p-6">
+            <div class="text-xs font-bold text-primary-dark/50 uppercase tracking-widest mb-1">Top Scorer</div>
+            <div class="text-xl font-bold">{{ results.0.student.name }}</div>
+            <div class="text-sm text-accent-dark">{{ results.0.obtained_marks }} / {{ results.0.total_marks }}</div>
+        </div>
+        <div class="glass-card p-6">
+            <div class="text-xs font-bold text-primary-dark/50 uppercase tracking-widest mb-1">Total Students</div>
+            <div class="text-3xl font-black">{{ results|length }}</div>
+        </div>
+    </div>
+    {% else %}
+    <div class="glass-card p-20 text-center">
+        <svg class="w-20 h-20 text-primary-dark/10 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path>
+        </svg>
+        <p class="text-xl font-bold text-primary-dark/40" data-en="Please select a class to view results." data-ur="نتائج دیکھنے کے لیے براہ کرم درجہ منتخب کریں۔">Please select a class to view results.</p>
+    </div>
+    {% endif %}
+
+</div>
+
+<style>
+    @media print {
+        .no-print { display: none !important; }
+        body { background-color: white !important; }
+        .glass-card { border: none !important; background: transparent !important; box-shadow: none !important; transform: none !important; }
+        table { border: 1px solid #0D3B3F !important; }
+        th, td { border: 1px solid #0D3B3F !important; color: black !important; }
+        .bg-primary-dark { background-color: #0D3B3F !important; -webkit-print-color-adjust: exact; }
+        .text-beige { color: white !important; }
+    }
+</style>
+{% endblock %}

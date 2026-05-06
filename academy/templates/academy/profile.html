@@ -22,7 +22,7 @@
         <!-- Header Ribbon -->
         <div class="h-32 bg-gradient-to-r from-primary-dark to-primary-teal relative">
             <div class="absolute inset-0 opacity-10"
-                style="background-image: url('{% static 'images/official_logo.jpg' %}'); background-repeat: repeat; background-size: 80px; filter: grayscale(100%);">
+                style="background-image: url({% static 'images/official_logo.jpg' %}); background-repeat: repeat; background-size: 80px; filter: grayscale(100%);">
             </div>
         </div>
 
@@ -49,6 +49,12 @@
                             </path>
                         </svg>
                         {{ student.student_id }} &bull; {{ student.course }}
+                        {% if student.is_sahib_tarteeb %}
+                            <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-accent-gold/20 text-accent-dark uppercase tracking-tighter border border-accent-gold/30">Sahib Tarteeb</span>
+                        {% endif %}
+                        {% if summary.no_absences %}
+                            <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-success/20 text-success uppercase tracking-tighter border border-success/30">Punctual (No Absences)</span>
+                        {% endif %}
                     </div>
                 </div>
 
@@ -152,6 +158,10 @@
                             <div class="text-xs text-primary-dark/50 uppercase tracking-wider font-semibold" data-en="Duration of Education" data-ur="مدت تعلیم">Duration of Education</div>
                             <div class="font-bold text-primary-dark">{{ student.duration_of_education|default:"—" }}</div>
                         </div>
+                        <div class="bg-white/40 p-3 rounded-lg border border-white/60">
+                            <div class="text-xs text-primary-dark/50 uppercase tracking-wider font-semibold" data-en="Class Teacher" data-ur="نگراں استاد">Class Teacher</div>
+                            <div class="font-bold text-primary-dark">{{ student.teacher.name|default:"—" }}</div>
+                        </div>
                     </div>
                 </div>
 
@@ -177,12 +187,71 @@
                         </div>
                     </div>
                 </div>
+                
+                <!-- ===== RESULTS HISTORY ===== -->
+                <div class="mt-8">
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 class="font-bold text-lg text-primary-dark ltr:border-l-4 rtl:border-r-4 border-accent-gold ltr:pl-3 rtl:pr-3" data-en="Examination Results" data-ur="امتحانی نتائج">Examination Results</h3>
+                        <a href="{% url 'academy:student_transcript' student.student_id %}" target="_blank"
+                            class="bg-accent-gold/10 text-accent-dark border border-accent-gold/30 px-3 py-1 rounded-lg text-xs font-bold hover:bg-accent-gold/20 transition flex items-center gap-2">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                            </svg>
+                            <span data-en="Full Transcript" data-ur="مکمل ٹرانسکرپٹ">Full Transcript</span>
+                        </a>
+                    </div>
+                    <div class="glass-card overflow-hidden">
+                        <table class="w-full text-left rtl:text-right border-collapse text-sm">
+                            <thead class="bg-primary-dark/5 text-primary-dark/70 text-[10px] font-bold uppercase tracking-wider">
+                                <tr>
+                                    <th class="px-6 py-3" data-en="Year/Exam" data-ur="سال/امتحان">Year/Exam</th>
+                                    <th class="px-6 py-3" data-en="Marks" data-ur="نمبر">Marks</th>
+                                    <th class="px-6 py-3" data-en="Grade" data-ur="گریڈ">Grade</th>
+                                    <th class="px-6 py-3 text-center" data-en="Action" data-ur="کارروائی">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-primary-dark/10">
+                                {% for r in results %}
+                                <tr class="hover:bg-primary-dark/5 transition-colors">
+                                    <td class="px-6 py-3">
+                                        <div class="font-bold text-primary-dark">{{ r.year }}</div>
+                                        <div class="text-[10px] text-primary-dark/50 font-bold Urdu-text">{{ r.exam_type }}</div>
+                                    </td>
+                                    <td class="px-6 py-3">
+                                        <div class="font-bold text-primary-dark">{{ r.obtained_marks }} / {{ r.total_marks }}</div>
+                                        <div class="text-[10px] text-primary-dark/50 font-bold">{{ r.percentage|floatformat:1 }}%</div>
+                                    </td>
+                                    <td class="px-6 py-3">
+                                        <span class="inline-flex px-2 py-0.5 rounded text-[10px] font-bold bg-primary-dark/5 text-primary-dark uppercase">
+                                            {{ r.overall_grade }}
+                                        </span>
+                                    </td>
+                                    <td class="px-6 py-3 text-center">
+                                        <a href="{% url 'academy:student_result_card' student.student_id r.year r.exam_type %}" target="_blank"
+                                           class="text-primary-teal hover:text-primary-dark transition font-bold text-xs flex items-center justify-center gap-1">
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                                            </svg>
+                                            <span data-en="View" data-ur="دیکھیں">View</span>
+                                        </a>
+                                    </td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="4" class="px-6 py-8 text-center text-primary-dark/40 italic" data-en="No results recorded." data-ur="کوئی نتیجہ ریکارڈ نہیں کیا گیا۔">No results recorded.</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
 
                 <!-- ===== ATTENDANCE HISTORY ===== -->
                 <div class="mt-8">
                     <h3 class="font-bold text-lg text-primary-dark mb-4 ltr:border-l-4 rtl:border-r-4 border-accent-gold ltr:pl-3 rtl:pr-3" data-en="Attendance History" data-ur="حاضری کی تاریخ">Attendance History</h3>
                     
-                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+                    <div class="grid grid-cols-2 md:grid-cols-5 gap-4 mb-6">
                         <div class="bg-success/10 border border-success/20 p-4 rounded-xl text-center">
                             <div class="text-xs text-success/70 font-bold uppercase tracking-wider mb-1" data-en="Present" data-ur="حاضر">Present</div>
                             <div class="text-2xl font-black text-success">{{ summary.present }}</div>
@@ -198,6 +267,10 @@
                         <div class="bg-primary-dark/10 border border-primary-dark/20 p-4 rounded-xl text-center">
                             <div class="text-xs text-primary-dark/70 font-bold uppercase tracking-wider mb-1" data-en="Total" data-ur="کل">Total</div>
                             <div class="text-2xl font-black text-primary-dark">{{ summary.total }}</div>
+                        </div>
+                        <div class="bg-accent-gold/10 border border-accent-gold/20 p-4 rounded-xl text-center col-span-2 md:col-span-1">
+                            <div class="text-xs text-accent-dark font-bold uppercase tracking-wider mb-1" data-en="Total Late" data-ur="کل تاخیر">Total Late</div>
+                            <div class="text-2xl font-black text-accent-dark">{{ summary.total_late_minutes }} <span class="text-xs">min</span></div>
                         </div>
                     </div>
 

@@ -33,7 +33,7 @@
     </div>
 
     <!-- Metrics Grid -->
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6 mb-12">
 
         <!-- Students -->
         <a href="{% url 'academy:directory' %}" class="block h-full group">
@@ -48,6 +48,25 @@
                         class="w-20 h-20 transition-transform group-hover:scale-110 duration-300">
                 </div>
                 <p class="text-primary-dark/60 font-medium text-sm mt-4" data-en="Registered Scholars" data-ur="رجسٹرڈ طلباء">Registered Scholars</p>
+            </div>
+        </a>
+
+        <!-- Sahib Tarteeb -->
+        <a href="{% url 'academy:directory' %}?is_sahib_tarteeb=true" class="block h-full group">
+            <div class="glass-card flex flex-col justify-between h-full p-6">
+                <div class="flex justify-between items-start">
+                    <div>
+                        <h3 class="text-primary-dark/70 font-semibold text-xs tracking-widest uppercase mb-2" data-en="Sahib Tarteeb" data-ur="صاحب ترتیب">Sahib
+                            Tarteeb</h3>
+                        <div class="text-3xl font-black text-accent-dark">{{ total_sahib }}</div>
+                    </div>
+                    <div class="p-4 bg-accent-gold/10 rounded-2xl group-hover:bg-accent-gold/20 transition-colors">
+                        <svg class="w-10 h-10 text-accent-dark" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z"></path>
+                        </svg>
+                    </div>
+                </div>
+                <p class="text-primary-dark/60 font-medium text-sm mt-4" data-en="Punctual Students" data-ur="پابند طلباء">Punctual Students</p>
             </div>
         </a>
 
@@ -112,6 +131,7 @@
                 <p class="text-primary-dark/60 font-medium text-sm mt-4" data-en="Requires Approval" data-ur="منظوری درکار">Requires Approval</p>
             </div>
         </a>
+
     </div>
 
     <!-- Quick Actions -->
@@ -120,7 +140,7 @@
         <div class="h-px flex-1 bg-gradient-to-r from-accent-gold/50 to-transparent"></div>
     </div>
 
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-20">
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-20">
 
         <!-- Admission Tile -->
         <a href="{% url 'academy:admission' %}" class="block">
@@ -159,7 +179,7 @@
         </a>
 
         <!-- Manage Subjects Tile -->
-        <a href="{% url 'academy:subjects_manage' %}" class="block md:col-start-2">
+        <a href="{% url 'academy:subjects_manage' %}" class="block">
             <div class="action-tile p-8 flex flex-col items-center justify-center text-center group h-64">
                 <img src="{% static 'images/official_logo.jpg' %}"
                     class="action-tile-bg-svg transition-transform group-hover:rotate-12 duration-500 rounded-full overflow-hidden opacity-20">
@@ -167,6 +187,30 @@
                     class="w-20 h-20 mb-6 transition-transform group-hover:-translate-y-2 duration-300">
                 <h3 class="text-beige text-xl font-bold mb-2" data-en="Manage Subjects" data-ur="مضامین ترتیب دیں">Manage Subjects</h3>
                 <p class="text-accent-light/80 text-sm" data-en="Define subjects for each academic class." data-ur="ہر تعلیمی درجے کے لیے مضامین ترتیب دیں۔">Define subjects for each academic class.</p>
+            </div>
+        </a>
+
+        <!-- Sahib Tarteeb List Tile -->
+        <a href="{% url 'academy:directory' %}?is_sahib_tarteeb=true" class="block">
+            <div class="action-tile p-8 flex flex-col items-center justify-center text-center group h-64">
+                <img src="{% static 'images/official_logo.jpg' %}"
+                    class="action-tile-bg-svg transition-transform group-hover:rotate-12 duration-500 rounded-full overflow-hidden opacity-20">
+                <img src="{% static 'icons/scholar.svg' %}"
+                    class="w-20 h-20 mb-6 transition-transform group-hover:-translate-y-2 duration-300">
+                <h3 class="text-beige text-xl font-bold mb-2" data-en="Sahib Tarteeb List" data-ur="صاحب ترتیب فہرست">Sahib Tarteeb List</h3>
+                <p class="text-accent-light/80 text-sm" data-en="View students who maintain perfect punctuality." data-ur="ان طلباء کو دیکھیں جو مکمل پابندی برقرار رکھتے ہیں۔">View students who maintain perfect punctuality.</p>
+            </div>
+        </a>
+
+        <!-- Class Gazette Tile -->
+        <a href="{% url 'academy:class_gazette' %}" class="block">
+            <div class="action-tile p-8 flex flex-col items-center justify-center text-center group h-64 border-accent-gold/50 bg-gradient-to-br from-primary-dark to-accent-dark">
+                <img src="{% static 'images/official_logo.jpg' %}"
+                    class="action-tile-bg-svg transition-transform group-hover:rotate-12 duration-500 rounded-full overflow-hidden opacity-20">
+                <img src="{% static 'icons/register.svg' %}"
+                    class="w-20 h-20 mb-6 transition-transform group-hover:-translate-y-2 duration-300">
+                <h3 class="text-beige text-xl font-bold mb-2" data-en="Class Gazette" data-ur="کلاس گزٹ">Class Gazette</h3>
+                <p class="text-accent-light/80 text-sm" data-en="View and print consolidated results for any class." data-ur="کسی بھی کلاس کے مجموعی نتائج دیکھیں اور پرنٹ کریں۔">View and print consolidated results for any class.</p>
             </div>
         </a>
 

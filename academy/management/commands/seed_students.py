@@ -57,7 +57,7 @@ ADDRESSES = [
     'سڑک نمبر ۵، کوئٹہ',
 ]
 
-DESIRED_CLASSES = ['درجہ اولیٰ', 'درجہ ثانیہ', 'درجہ ثالثہ', 'درجہ رابعہ', 'درجہ خامسہ', 'درجہ سادسہ', 'درجہ سابعہ']
+DESIRED_CLASSES = ['درجہ اولیٰ', 'درجہ ثانیہ', 'درجہ ثالثہ', 'درجہ رابعہ', 'درجہ خامسہ', 'درجہ سادسہ', 'درجہ متوسطہ']
 FIRST_CLASSES = ['ناظرہ', 'حفظ اول', 'قاعدہ', 'درجہ اول']
 DURATIONS = ['۱ سال', '۲ سال', '۳ سال', '۶ ماہ', '۱ سال ۶ ماہ']
 LEFT_CLASSES = ['درجہ سوم', 'درجہ چہارم', 'درجہ دوم', '']
@@ -91,7 +91,7 @@ class Command(BaseCommand):
                 course=course,
                 enrollment_date=date(2024, random.randint(1, 12), random.randint(1, 28)),
                 attendance_score=round(random.uniform(60.0, 100.0), 1),
-                desired_class=random.choice(DESIRED_CLASSES) if course == 'شعبہ کتب' else '',
+                desired_class=random.choice(DESIRED_CLASSES) if course == 'شعبہ کتب' else random.choice(['1', '2', '3', '4', '5', '6', '7']),
                 date_of_birth=dob,
                 first_class_in_jamia=random.choice(FIRST_CLASSES),
                 wifaq_registration_number=f'WM-{random.randint(10000, 99999)}',

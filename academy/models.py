@@ -15,9 +15,19 @@ class Student(models.Model):
         ('درجہ رابعہ', 'درجہ رابعہ'),
         ('درجہ خامسہ', 'درجہ خامسہ'),
         ('درجہ سادسہ', 'درجہ سادسہ'),
-        ('درجہ سابعہ', 'درجہ سابعہ'),
+        ('درجہ متوسطہ', 'درجہ متوسطہ'),
     ]
 
+
+    GENERAL_CLASS_CHOICES = [
+        ('1', '1'),
+        ('2', '2'),
+        ('3', '3'),
+        ('4', '4'),
+        ('5', '5'),
+        ('6', '6'),
+        ('7', '7'),
+    ]
 
     student_id = models.CharField(max_length=20, primary_key=True, unique=True, blank=True)
     name = models.CharField(max_length=100)
@@ -29,6 +39,7 @@ class Student(models.Model):
     course = models.CharField(max_length=50, choices=COURSE_CHOICES)
     enrollment_date = models.DateField(default=timezone.now)
     attendance_score = models.FloatField(default=100.0)
+    teacher = models.ForeignKey('Staff', on_delete=models.SET_NULL, null=True, blank=True, verbose_name='نگراں استاد')
 
     # Additional Academic Fields
     desired_class = models.CharField(max_length=100, blank=True, verbose_name='مطلوبہ درجہ')
@@ -42,6 +53,9 @@ class Student(models.Model):
     reason_for_leaving = models.TextField(blank=True, verbose_name='وجہ اخراج')
     date_of_leaving = models.DateField(null=True, blank=True, verbose_name='تاریخ اخراج')
     duration_of_education = models.CharField(max_length=100, blank=True, verbose_name='مدت تعلیم')
+    monthly_fee = models.IntegerField(default=0, verbose_name='ماہانہ خرچہ')
+    personal_contribution = models.CharField(max_length=100, blank=True, verbose_name='ذاتی تعاون')
+    is_sahib_tarteeb = models.BooleanField(default=False, verbose_name='صاحب ترتیب')
 
     def save(self, *args, **kwargs):
         if not self.student_id:
@@ -54,11 +68,15 @@ class Student(models.Model):
                 new_id_num = 1
             self.student_id = f'IA-{current_year}-{new_id_num:04d}'
         
-        # Enforce that only 'شعبہ کتب' has a desired class
-        if self.course != 'شعبہ کتب':
-            self.desired_class = ''
-            
         super().save(*args, **kwargs)
+
+    def no_absences_last_year(self):
+        last_year = timezone.now().date() - timezone.timedelta(days=365)
+        return not self.attendances.filter(date__gte=last_year, status='Absent').exists()
+
+    def total_late_minutes_last_year(self):
+        last_year = timezone.now().date() - timezone.timedelta(days=365)
+        return self.attendances.filter(date__gte=last_year).aggregate(total=models.Sum('minutes_late'))['total'] or 0
 
     def __str__(self):
         return f"{self.student_id} - {self.name}"
@@ -74,7 +92,7 @@ class Staff(models.Model):
     name = models.CharField(max_length=100)
     role = models.CharField(max_length=50, choices=ROLE_CHOICES)
     contact_number = models.CharField(max_length=20)
-    salary = models.CharField(max_length=50, blank=True, verbose_name='تنخواہ')
+    salary = models.IntegerField(default=0, verbose_name='تنخواہ')
     assigned_class = models.CharField(max_length=100, blank=True, verbose_name='کلاس')
     duration = models.CharField(max_length=100, blank=True, verbose_name='مدت')
     address = models.TextField(blank=True, verbose_name='پتہ')
@@ -92,13 +110,14 @@ class Attendance(models.Model):
     student = models.ForeignKey(Student, on_delete=models.CASCADE, related_name='attendances')
     date = models.DateField(default=timezone.now)
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='Present')
+    minutes_late = models.IntegerField(default=0, verbose_name='تاخیر (منٹ)')
     sms_sent = models.BooleanField(default=False)
 
     class Meta:
         unique_together = ('student', 'date')
 
     def __str__(self):
-        return f"{self.student.name} - {self.date} ({self.status})"
+        return f"{self.student.name} - {self.date} ({self.status}) - {self.minutes_late} min late"
 
 class LeaveRequest(models.Model):
     STATUS_CHOICES = [
@@ -120,14 +139,24 @@ class Subject(models.Model):
     name = models.CharField(max_length=100, verbose_name='مضمون کا نام')
     course = models.CharField(max_length=50, choices=Student.COURSE_CHOICES, verbose_name='شعبہ')
     class_name = models.CharField(max_length=100, blank=True, verbose_name='درجہ')
+    teacher = models.ForeignKey(Staff, on_delete=models.SET_NULL, null=True, blank=True, verbose_name='استاد')
     total_marks = models.IntegerField(default=100, verbose_name='کل نمبر')
 
     def __str__(self):
         return f"{self.name} ({self.course} - {self.class_name})"
 
 class Result(models.Model):
+    EXAM_TYPE_CHOICES = [
+        ('جائزہ 1', 'جائزہ 1'),
+        ('جائزہ 2', 'جائزہ 2'),
+        ('جائزہ 3', 'جائزہ 3'),
+        ('امتحان نصف السنۃ', 'امتحان نصف السنۃ'),
+        ('سالانہ امتحان', 'سالانہ امتحان'),
+    ]
+
     student = models.ForeignKey(Student, on_delete=models.CASCADE, related_name='results')
     year = models.CharField(max_length=4, verbose_name='سال')
+    exam_type = models.CharField(max_length=50, choices=EXAM_TYPE_CHOICES, default='سالانہ امتحان', verbose_name='امتحان کی قسم')
     subjects_json = models.JSONField(default=dict, help_text="Store dict of subjects e.g. {'نحو': 90, 'صرف': 85}")
     total_marks = models.IntegerField(default=0, verbose_name='کل نمبر')
     obtained_marks = models.IntegerField(default=0, verbose_name='حاصل کردہ نمبر')
@@ -136,7 +165,7 @@ class Result(models.Model):
     remarks = models.TextField(blank=True, verbose_name='کیفیت')
 
     class Meta:
-        unique_together = ('student', 'year')
+        unique_together = ('student', 'year', 'exam_type')
 
     def save(self, *args, **kwargs):
         # Calculate total and obtained from subjects_json
@@ -162,4 +191,5 @@ class Result(models.Model):
         super().save(*args, **kwargs)
 
     def __str__(self):
-        return f"{self.student.name} - {self.year} ({self.overall_grade})"
+        return f"{self.student.name} - {self.year} - {self.exam_type} ({self.overall_grade})"
+

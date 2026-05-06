@@ -16,7 +16,12 @@
     <!-- Header & Search -->
     <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
         <div>
-            <h1 class="text-primary-dark text-3xl font-bold" data-en="Student Directory" data-ur="طلباء ڈائریکٹری">Student Directory</h1>
+            <h1 class="text-primary-dark text-3xl font-bold flex items-center gap-3">
+                <span data-en="Student Directory" data-ur="طلباء ڈائریکٹری">Student Directory</span>
+                {% if sahib_filter == 'true' %}
+                    <span class="px-3 py-1 rounded-full bg-accent-gold/20 text-accent-dark text-xs font-bold uppercase" data-en="Sahib Tarteeb Only" data-ur="صرف صاحب ترتیب">Sahib Tarteeb Only</span>
+                {% endif %}
+            </h1>
             <p class="text-primary-dark/60 mt-1" data-en="Manage and view all enrolled scholars." data-ur="تمام داخل شدہ طلباء کا نظم اور مشاہدہ کریں۔">Manage and view all enrolled scholars.</p>
         </div>
 
@@ -33,25 +38,26 @@
             </div>
 
             <input type="hidden" name="course" value="{{ course_filter }}">
+            <input type="hidden" name="is_sahib_tarteeb" value="{{ sahib_filter }}">
             <button type="submit" class="hidden">Search</button>
         </form>
     </div>
 
     <!-- Filter Buttons -->
     <div class="flex gap-4 mb-8 overflow-x-auto pb-2 scrollbar-none">
-        <a href="?course=All{% if query %}&q={{ query }}{% endif %}"
+        <a href="?course=All{% if query %}&q={{ query }}{% endif %}{% if sahib_filter %}&is_sahib_tarteeb={{ sahib_filter }}{% endif %}"
             class="px-5 py-2.5 rounded-xl text-sm font-bold whitespace-nowrap transition-all shadow-sm {% if course_filter == 'All' or not course_filter %}bg-primary-dark text-beige{% else %}bg-white/50 text-primary-dark hover:bg-white border border-primary-dark/10{% endif %}">
             <span data-en="All Courses" data-ur="تمام شعبہ جات">All Courses</span> ({{ total_count }})
         </a>
-        <a href="?course=شعبہ حفظ و ناظرہ{% if query %}&q={{ query }}{% endif %}"
+        <a href="?course=شعبہ حفظ و ناظرہ{% if query %}&q={{ query }}{% endif %}{% if sahib_filter %}&is_sahib_tarteeb={{ sahib_filter }}{% endif %}"
             class="px-5 py-2.5 rounded-xl text-sm font-bold whitespace-nowrap transition-all shadow-sm {% if course_filter == 'شعبہ حفظ و ناظرہ' %}bg-primary-dark text-beige{% else %}bg-white/50 text-primary-dark hover:bg-white border border-primary-dark/10{% endif %}">
             <span data-en="Hifz & Nazra Dept." data-ur="شعبہ حفظ و ناظرہ">Hifz & Nazra Dept.</span> ({{ hifz_count }})
         </a>
-        <a href="?course=شعبہ کتب{% if query %}&q={{ query }}{% endif %}"
+        <a href="?course=شعبہ کتب{% if query %}&q={{ query }}{% endif %}{% if sahib_filter %}&is_sahib_tarteeb={{ sahib_filter }}{% endif %}"
             class="px-5 py-2.5 rounded-xl text-sm font-bold whitespace-nowrap transition-all shadow-sm {% if course_filter == 'شعبہ کتب' %}bg-primary-dark text-beige{% else %}bg-white/50 text-primary-dark hover:bg-white border border-primary-dark/10{% endif %}">
             <span data-en="Kutub Dept." data-ur="شعبہ کتب">Kutub Dept.</span> ({{ alim_count }})
         </a>
-        <a href="?course=شعبہ بنین{% if query %}&q={{ query }}{% endif %}"
+        <a href="?course=شعبہ بنین{% if query %}&q={{ query }}{% endif %}{% if sahib_filter %}&is_sahib_tarteeb={{ sahib_filter }}{% endif %}"
             class="px-5 py-2.5 rounded-xl text-sm font-bold whitespace-nowrap transition-all shadow-sm {% if course_filter == 'شعبہ بنین' %}bg-primary-dark text-beige{% else %}bg-white/50 text-primary-dark hover:bg-white border border-primary-dark/10{% endif %}">
             <span data-en="Baneen Dept." data-ur="شعبہ بنین">Baneen Dept.</span> ({{ basic_count }})
         </a>
@@ -76,8 +82,20 @@
                             data-en="{{ student.name_en|default:student.name }}" 
                             data-ur="{{ student.name }}">
                             {{ student.name_en|default:student.name }}</h3>
-                        <div class="mt-2 inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-primary-dark/5 text-primary-dark/70 uppercase tracking-tighter border border-primary-dark/10">
-                            ID: {{ student.student_id }}
+                        <div class="mt-2 flex flex-wrap gap-1">
+                            <div class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-primary-dark/5 text-primary-dark/70 uppercase tracking-tighter border border-primary-dark/10">
+                                ID: {{ student.student_id }}
+                            </div>
+                            {% if student.is_sahib_tarteeb %}
+                                <div class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-accent-gold/20 text-accent-dark uppercase tracking-tighter border border-accent-gold/30">
+                                    <span data-en="Sahib Tarteeb" data-ur="صاحب ترتیب">Sahib Tarteeb</span>
+                                </div>
+                            {% endif %}
+                            {% if student.no_absences_last_year %}
+                                <div class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-success/20 text-success uppercase tracking-tighter border border-success/30">
+                                    <span data-en="Punctual" data-ur="باوقار">Punctual</span>
+                                </div>
+                            {% endif %}
                         </div>
                     </div>
                 </div>

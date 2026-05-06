@@ -92,6 +92,7 @@
                             <th class="px-6 py-4 text-center"><span data-en="Present" data-ur="حاضر">Present</span></th>
                             <th class="px-6 py-4 text-center"><span data-en="Absent" data-ur="غیر حاضر">Absent</span></th>
                             <th class="px-6 py-4 text-center"><span data-en="Leave" data-ur="رخصت">Leave</span></th>
+                            <th class="px-6 py-4 text-center"><span data-en="Min Late" data-ur="تاخیر (منٹ)">Min Late</span></th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-primary-dark/10">
@@ -101,6 +102,9 @@
                             <td class="px-6 py-4 font-bold text-primary-dark">
                                 {{ student.name_en|default:student.name }}
                                 <div class="text-[10px] opacity-50 font-normal">{{ student.name }}</div>
+                                {% if student.is_sahib_tarteeb %}
+                                    <span class="inline-block px-1.5 py-0.5 bg-accent-gold/20 text-accent-dark text-[9px] font-bold rounded uppercase">Sahib Tarteeb</span>
+                                {% endif %}
                             </td>
                             <td class="px-6 py-4">
                                 {% if student.current_status == 'Present' %}
@@ -132,10 +136,14 @@
                                         class="attendance-radio w-6 h-6 text-warning border-gray-300 focus:ring-warning accent-warning">
                                 </label>
                             </td>
+                            <td class="px-6 py-4 text-center">
+                                <input type="number" name="minutes_late_{{ student.student_id }}" value="{{ student.current_minutes_late }}" min="0"
+                                    class="w-16 px-2 py-1 text-center bg-white/50 border border-primary-dark/10 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent-gold/50 text-primary-dark font-medium">
+                            </td>
                         </tr>
                         {% empty %}
                         <tr>
-                            <td colspan="6" class="px-6 py-12 text-center">
+                            <td colspan="7" class="px-6 py-12 text-center">
                                 <p class="text-primary-dark/40 font-bold" data-en="No students found for the selected filters." data-ur="منتخب فلٹرز کے لیے کوئی طالب علم نہیں ملا۔">No students found for the selected filters.</p>
                             </td>
                         </tr>

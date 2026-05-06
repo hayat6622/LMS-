@@ -8,10 +8,11 @@ class AdmissionForm(forms.ModelForm):
         model = Student
         fields = [
             'name', 'name_en', 'date_of_birth', 'guardian_name', 'guardian_relation',
-            'contact_number', 'address', 'course', 'desired_class',
+            'contact_number', 'address', 'course', 'desired_class', 'teacher',
             'first_class_in_jamia', 'wifaq_registration_number', 'roll_number',
             'father_cnic', 'left_class_year', 'returned_to_class',
             'reason_for_leaving', 'date_of_leaving', 'duration_of_education',
+            'monthly_fee', 'personal_contribution', 'is_sahib_tarteeb',
         ]
         labels = {
             'name': 'مکمل نام / Full Name (Urdu)',
@@ -23,6 +24,7 @@ class AdmissionForm(forms.ModelForm):
             'address': 'پتہ / Address',
             'course': 'کورس / Course',
             'desired_class': 'مطلوبہ درجہ / Desired Class',
+            'teacher': 'نگراں استاد / Class Teacher',
             'first_class_in_jamia': 'جامعہ میں پہلا درجہ / First Class in Jamia',
             'wifaq_registration_number': 'وفاق المدارس رقم التسجیل / Wifaq Reg. No.',
             'roll_number': 'رقم الجلوس / Roll Number',
@@ -32,13 +34,16 @@ class AdmissionForm(forms.ModelForm):
             'reason_for_leaving': 'وجہ اخراج / Reason for Leaving',
             'date_of_leaving': 'تاریخ اخراج / Date of Leaving',
             'duration_of_education': 'مدت تعلیم / Duration of Education',
+            'monthly_fee': 'ماہانہ خرچہ / Monthly Fee',
+            'personal_contribution': 'ذاتی تعاون / Personal Contribution',
+            'is_sahib_tarteeb': 'صاحب ترتیب / Sahib Tarteeb',
         }
         widgets = {
             'address': forms.Textarea(attrs={'rows': 2}),
             'reason_for_leaving': forms.Textarea(attrs={'rows': 2}),
             'date_of_birth': forms.DateInput(attrs={'type': 'date'}),
             'date_of_leaving': forms.DateInput(attrs={'type': 'date'}),
-            'desired_class': forms.Select(choices=[('', '---------')] + Student.KUTUB_CLASS_CHOICES),
+            'desired_class': forms.Select(choices=[('', '---------')] + Student.KUTUB_CLASS_CHOICES + Student.GENERAL_CLASS_CHOICES),
         }
 
     def __init__(self, *args, **kwargs):
@@ -74,9 +79,10 @@ class AdmissionForm(forms.ModelForm):
             Fieldset(
                 'تعلیمی معلومات / Academic Information',
                 Row(
-                    Column('course', css_class='form-group col-md-6 mb-0 w-full'),
-                    Column('desired_class', css_class='form-group col-md-6 mb-0 w-full'),
-                    css_class='grid grid-cols-1 md:grid-cols-2 gap-4'
+                    Column('course', css_class='form-group col-md-4 mb-0 w-full'),
+                    Column('desired_class', css_class='form-group col-md-4 mb-0 w-full'),
+                    Column('teacher', css_class='form-group col-md-4 mb-0 w-full'),
+                    css_class='grid grid-cols-1 md:grid-cols-3 gap-4'
                 ),
                 Row(
                     Column('first_class_in_jamia', css_class='form-group col-md-6 mb-0 w-full'),
@@ -87,6 +93,12 @@ class AdmissionForm(forms.ModelForm):
                     Column('wifaq_registration_number', css_class='form-group col-md-6 mb-0 w-full'),
                     Column('roll_number', css_class='form-group col-md-6 mb-0 w-full'),
                     css_class='grid grid-cols-1 md:grid-cols-2 gap-4 mt-4'
+                ),
+                Row(
+                    Column('monthly_fee', css_class='form-group col-md-4 mb-0 w-full'),
+                    Column('personal_contribution', css_class='form-group col-md-4 mb-0 w-full'),
+                    Column('is_sahib_tarteeb', css_class='form-group col-md-4 mb-0 w-full'),
+                    css_class='grid grid-cols-1 md:grid-cols-3 gap-4 mt-4'
                 ),
             ),
             # --- Leaving Info ---
@@ -155,16 +167,7 @@ class SubjectForm(forms.ModelForm):
         ('شعبہ کتب', 'شعبہ کتب'),
         ('شعبہ بنین', 'شعبہ بنین'),
     ]
-    CLASS_OPTS = [
-        ('', '---'),
-        ('درجہ اولیٰ', 'درجہ اولیٰ'),
-        ('درجہ ثانیہ', 'درجہ ثانیہ'),
-        ('درجہ ثالثہ', 'درجہ ثالثہ'),
-        ('درجہ رابعہ', 'درجہ رابعہ'),
-        ('درجہ خامسہ', 'درجہ خامسہ'),
-        ('درجہ سادسہ', 'درجہ سادسہ'),
-        ('درجہ سابعہ', 'درجہ سابعہ'),
-    ]
+    CLASS_OPTS = [('', '---')] + Student.KUTUB_CLASS_CHOICES + Student.GENERAL_CLASS_CHOICES
 
     name = forms.CharField(label='مضمون کا نام', widget=forms.TextInput(attrs={'data-ur': 'مضمون کا نام', 'data-en': 'Subject Name'}))
     course = forms.ChoiceField(label='شعبہ', choices=COURSE_OPTS)
@@ -173,4 +176,5 @@ class SubjectForm(forms.ModelForm):
 
     class Meta:
         model = Subject
-        fields = ['name', 'course', 'class_name', 'total_marks']
+        fields = ['name', 'course', 'class_name', 'teacher', 'total_marks']
+

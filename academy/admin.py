@@ -34,6 +34,6 @@ class LeaveRequestAdmin(admin.ModelAdmin):
 
 @admin.register(Result)
 class ResultAdmin(admin.ModelAdmin):
-    list_display = ('student', 'year', 'overall_grade', 'percentage')
-    list_filter = ('year', 'overall_grade')
+    list_display = ('student', 'year', 'exam_type', 'overall_grade', 'percentage')
+    list_filter = ('year', 'exam_type', 'overall_grade')
     search_fields = ('student__name', 'student__student_id')

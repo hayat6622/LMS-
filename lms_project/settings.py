@@ -102,20 +102,28 @@ import json
 FIREBASE_KEY_PATH = os.path.join(BASE_DIR, 'firebase-key.json')
 FIREBASE_CREDENTIALS_JSON = os.environ.get('FIREBASE_CREDENTIALS')
 
-if FIREBASE_CREDENTIALS_JSON:
-    # Option 1: Load from Environment Variable (Recommended for Live Servers)
-    try:
-        cred_dict = json.loads(FIREBASE_CREDENTIALS_JSON)
-        cred = credentials.Certificate(cred_dict)
-        firebase_admin.initialize_app(cred)
-    except Exception:
-        pass
-elif os.path.exists(FIREBASE_KEY_PATH):
-    # Option 2: Load from Local File (Local Development)
-    cred = credentials.Certificate(FIREBASE_KEY_PATH)
-    firebase_admin.initialize_app(cred)
+if not firebase_admin._apps:
+    if FIREBASE_CREDENTIALS_JSON:
+        try:
+            cred_dict = json.loads(FIREBASE_CREDENTIALS_JSON)
+            cred = credentials.Certificate(cred_dict)
+            firebase_admin.initialize_app(cred)
+        except Exception as e:
+            # On Vercel, we can't print much, but we should at least not crash the build
+            # We will catch this at runtime if it fails
+            pass
+    elif os.path.exists(FIREBASE_KEY_PATH):
+        try:
+            cred = credentials.Certificate(FIREBASE_KEY_PATH)
+            firebase_admin.initialize_app(cred)
+        except Exception:
+            pass
 
-db = firestore.client() if firebase_admin._apps else None
+# Initialize client only if app exists to avoid immediate ValueError
+try:
+    db = firestore.client()
+except Exception:
+    db = None
 
 
 # Password validation

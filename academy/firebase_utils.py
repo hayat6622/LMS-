@@ -3,12 +3,17 @@ from firebase_admin import firestore
 
 def get_db():
     """Returns the Firestore client."""
-    return firestore.client()
+    try:
+        return firestore.client()
+    except Exception:
+        return None
 
 def get_collection(collection_name):
     """Returns a collection reference."""
     db = get_db()
-    return db.collection(collection_name)
+    if db:
+        return db.collection(collection_name)
+    return None
 
 def save_document(collection_name, doc_id, data):
     """Saves or updates a document in a collection."""
@@ -30,7 +35,10 @@ def delete_document(collection_name, doc_id):
 
 def list_documents(collection_name):
     """Lists all documents in a collection."""
-    docs = get_collection(collection_name).stream()
+    col_ref = get_collection(collection_name)
+    if not col_ref:
+        return []
+    docs = col_ref.stream()
     return [{**doc.to_dict(), 'id': doc.id} for doc in docs]
 
 # Example mapping for Student model

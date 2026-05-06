@@ -108,16 +108,12 @@ if FIREBASE_CREDENTIALS_JSON:
         cred_dict = json.loads(FIREBASE_CREDENTIALS_JSON)
         cred = credentials.Certificate(cred_dict)
         firebase_admin.initialize_app(cred)
-        print("Firebase initialized using environment variable.")
-    except Exception as e:
-        print(f"Error initializing Firebase from env var: {e}")
+    except Exception:
+        pass
 elif os.path.exists(FIREBASE_KEY_PATH):
     # Option 2: Load from Local File (Local Development)
     cred = credentials.Certificate(FIREBASE_KEY_PATH)
     firebase_admin.initialize_app(cred)
-    print("Firebase initialized using firebase-key.json.")
-else:
-    print("Warning: Firebase credentials not found (checked FIREBASE_CREDENTIALS env var and firebase-key.json).")
 
 db = firestore.client() if firebase_admin._apps else None
 

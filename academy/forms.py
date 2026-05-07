@@ -48,6 +48,16 @@ class AdmissionForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        from . import firebase_utils
+        
+        # Manually populate teacher choices from Firestore
+        staff_members = firebase_utils.list_documents('staff')
+        teacher_choices = [('', '---------')] + [(s['staff_id'], s['name']) for s in staff_members]
+        if 'teacher' in self.fields:
+            self.fields['teacher'].queryset = Staff.objects.none()
+            self.fields['teacher'].choices = teacher_choices
+            self.fields['teacher'].required = False
+        
         self.helper = FormHelper()
         self.helper.form_tag = False
         self.helper.layout = Layout(
@@ -117,23 +127,15 @@ class AdmissionForm(forms.ModelForm):
             ),
         )
 
-class StaffForm(forms.ModelForm):
-    class Meta:
-        model = Staff
-        fields = ['staff_id', 'name', 'role', 'contact_number', 'salary', 'assigned_class', 'duration', 'address']
-        labels = {
-            'staff_id': 'Staff ID / عملہ آئی ڈی',
-            'name': 'نام / Name',
-            'role': 'عہدہ / Role',
-            'contact_number': 'رابطہ نمبر / Contact Number',
-            'salary': 'تنخواہ / Salary',
-            'assigned_class': 'کلاس / Assigned Class',
-            'duration': 'مدت / Duration',
-            'address': 'پتہ / Address',
-        }
-        widgets = {
-            'address': forms.Textarea(attrs={'rows': 2}),
-        }
+class StaffForm(forms.Form):
+    staff_id = forms.CharField(max_length=20, label='Staff ID / عملہ آئی ڈی')
+    name = forms.CharField(max_length=100, label='نام / Name')
+    role = forms.ChoiceField(choices=Staff.ROLE_CHOICES, label='عہدہ / Role')
+    contact_number = forms.CharField(max_length=20, label='رابطہ نمبر / Contact Number')
+    salary = forms.IntegerField(initial=0, label='تنخواہ / Salary')
+    assigned_class = forms.CharField(max_length=100, required=False, label='کلاس / Assigned Class')
+    duration = forms.CharField(max_length=100, required=False, label='مدت / Duration')
+    address = forms.CharField(widget=forms.Textarea(attrs={'rows': 2}), required=False, label='پتہ / Address')
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -161,7 +163,7 @@ class StaffForm(forms.ModelForm):
                 css_class='grid grid-cols-1 md:grid-cols-2 gap-4 mt-4'
             ),
         )
-class SubjectForm(forms.ModelForm):
+class SubjectForm(forms.Form):
     COURSE_OPTS = [
         ('شعبہ حفظ و ناظرہ', 'شعبہ حفظ و ناظرہ'),
         ('شعبہ کتب', 'شعبہ کتب'),
@@ -172,9 +174,12 @@ class SubjectForm(forms.ModelForm):
     name = forms.CharField(label='مضمون کا نام', widget=forms.TextInput(attrs={'data-ur': 'مضمون کا نام', 'data-en': 'Subject Name'}))
     course = forms.ChoiceField(label='شعبہ', choices=COURSE_OPTS)
     class_name = forms.ChoiceField(label='درجہ', choices=CLASS_OPTS, required=False)
-    total_marks = forms.IntegerField(label='کل نمبر', widget=forms.NumberInput(attrs={'data-ur': 'کل نمبر', 'data-en': 'Total Marks'}))
+    teacher = forms.ChoiceField(label='استاد', required=False)
+    total_marks = forms.IntegerField(label='کل نمبر', initial=100)
 
-    class Meta:
-        model = Subject
-        fields = ['name', 'course', 'class_name', 'teacher', 'total_marks']
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        from . import firebase_utils
+        staff_members = firebase_utils.list_documents('staff')
+        self.fields['teacher'].choices = [('', '---------')] + [(s['staff_id'], s['name']) for s in staff_members]
 

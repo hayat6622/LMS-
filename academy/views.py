@@ -33,9 +33,37 @@ def admission(request):
     if request.method == 'POST':
         form = AdmissionForm(request.POST)
         if form.is_valid():
-            student = form.save()
-            messages.success(request, f"طالب علم {student.name} کامیابی سے داخل ہو گیا۔ / Successfully enrolled scholar {student.name}.")
-            return redirect('academy:admission_receipt', student_id=student.student_id)
+            # Get data from form but don't save to SQLite
+            data = form.cleaned_data
+            
+            # Manually handle student_id generation for Firestore
+            import datetime
+            current_year = datetime.datetime.now().year
+            students = firebase_utils.list_documents('students')
+            last_id_num = 0
+            for s in students:
+                sid = s.get('student_id', '')
+                if sid.startswith(f'IA-{current_year}-'):
+                    try:
+                        num = int(sid.split('-')[-1])
+                        if num > last_id_num: last_id_num = num
+                    except: pass
+            
+            new_id = f'IA-{current_year}-{(last_id_num + 1):04d}'
+            data['student_id'] = new_id
+            
+            # Convert dates to strings for JSON serialization
+            for key, value in data.items():
+                if isinstance(value, datetime.date):
+                    data[key] = str(value)
+                elif hasattr(value, 'staff_id'): # Handle potential Staff object if any
+                    data[key] = value.staff_id
+            
+            # Save to Firestore
+            firebase_utils.save_document('students', new_id, data)
+            
+            messages.success(request, f"طالب علم {data['name']} کامیابی سے داخل ہو گیا۔ / Successfully enrolled scholar {data['name']}.")
+            return redirect('academy:admission_receipt', student_id=new_id)
         else:
             messages.error(request, "براہ کرم نیچے دی گئی غلطیاں درست کریں۔ / Please correct the errors below.")
     else:
@@ -44,52 +72,61 @@ def admission(request):
     return render(request, 'academy/admission.html', {'form': form})
 
 def student_edit(request, student_id):
-    student = get_object_or_404(Student, student_id=student_id)
-    if request.method == 'POST':
-        form = AdmissionForm(request.POST, instance=student)
-        if form.is_valid():
-            student = form.save()
-            messages.success(request, f"طالب علم {student.name} کی معلومات کامیابی سے اپ ڈیٹ ہو گئیں۔ / Student {student.name} updated successfully.")
-            return redirect('academy:student_profile', student_id=student.student_id)
-        else:
-            messages.error(request, "براہ کرم نیچے دی گئی غلطیاں درست کریں۔ / Please correct the errors below.")
-    else:
-        form = AdmissionForm(instance=student)
+    student_data = firebase_utils.get_document('students', student_id)
+    if not student_data:
+        return redirect('academy:directory')
         
-    return render(request, 'academy/student_edit.html', {'form': form, 'student': student})
+    if request.method == 'POST':
+        form = AdmissionForm(request.POST, initial=student_data)
+        if form.is_valid():
+            data = form.cleaned_data
+            import datetime
+            for key, value in data.items():
+                if isinstance(value, datetime.date):
+                    data[key] = str(value)
+            
+            firebase_utils.save_document('students', student_id, data)
+            messages.success(request, f"Student {data['name']} updated successfully.")
+            return redirect('academy:student_profile', student_id=student_id)
+    else:
+        form = AdmissionForm(initial=student_data)
+        
+    return render(request, 'academy/student_edit.html', {'form': form, 'student': student_data})
 
 def admission_receipt(request, student_id):
-    student = get_object_or_404(Student, student_id=student_id)
+    student = firebase_utils.get_document('students', student_id)
+    if not student:
+        return redirect('academy:admission')
     return render(request, 'academy/receipt.html', {'student': student})
 
 def directory(request):
-    all_students = Student.objects.all()
+    all_students = firebase_utils.list_documents('students')
     
-    query = request.GET.get('q', '')
+    query = request.GET.get('q', '').lower()
     if query:
-        all_students = all_students.filter(
-            Q(name__icontains=query) | 
-            Q(name_en__icontains=query) | 
-            Q(student_id__icontains=query)
-        )
+        all_students = [
+            s for s in all_students 
+            if query in s.get('name', '').lower() or 
+               query in s.get('name_en', '').lower() or 
+               query in s.get('student_id', '').lower()
+        ]
         
     course_filter = request.GET.get('course', 'All')
     sahib_filter = request.GET.get('is_sahib_tarteeb', '')
     
     if sahib_filter == 'true':
-        all_students = all_students.filter(is_sahib_tarteeb=True)
+        all_students = [s for s in all_students if s.get('is_sahib_tarteeb')]
     
-    total_count = all_students.count()
-    hifz_count = all_students.filter(course='شعبہ حفظ و ناظرہ').count()
-    alim_count = all_students.filter(course='شعبہ کتب').count()
-    basic_count = all_students.filter(course='شعبہ بنین').count()
-    
-    students = all_students
     if course_filter and course_filter != 'All':
-        students = students.filter(course=course_filter)
-        
+        all_students = [s for s in all_students if s.get('course') == course_filter]
+
+    total_count = len(all_students)
+    hifz_count = len([s for s in all_students if s.get('course') == 'شعبہ حفظ و ناظرہ'])
+    alim_count = len([s for s in all_students if s.get('course') == 'شعبہ کتب'])
+    basic_count = len([s for s in all_students if s.get('course') == 'شعبہ بنین'])
+    
     context = {
-        'students': students,
+        'students': all_students,
         'query': query,
         'course_filter': course_filter,
         'sahib_filter': sahib_filter,
@@ -101,24 +138,29 @@ def directory(request):
     return render(request, 'academy/directory.html', context)
 
 def student_profile(request, student_id):
-    student = get_object_or_404(Student, student_id=student_id)
-    attendance_records = student.attendances.all().order_by('-date')
+    student = firebase_utils.get_document('students', student_id)
+    if not student:
+        return redirect('academy:directory')
+        
+    all_att = firebase_utils.list_documents('attendance')
+    attendance_records = [a for a in all_att if a.get('student_id') == student_id]
+    attendance_records = sorted(attendance_records, key=lambda x: x.get('date', ''), reverse=True)
     
     # Calculate summary
-    total_days = attendance_records.count()
-    present_days = attendance_records.filter(status='Present').count()
-    absent_days = attendance_records.filter(status='Absent').count()
-    leave_days = attendance_records.filter(status='Leave').count()
+    total_days = len(attendance_records)
+    present_days = len([a for a in attendance_records if a.get('status') == 'Present'])
+    absent_days = len([a for a in attendance_records if a.get('status') == 'Absent'])
+    leave_days = len([a for a in attendance_records if a.get('status') == 'Leave'])
     
-    attendance_percentage = 0
-    if total_days > 0:
-        attendance_percentage = (present_days / total_days) * 100
+    attendance_percentage = (present_days / total_days * 100) if total_days > 0 else 0
     
-    # Update student score if it changed significantly (just for sync)
-    student.attendance_score = round(attendance_percentage, 1)
-    student.save()
+    # Sync score back to Firestore if needed
+    if student.get('attendance_score') != round(attendance_percentage, 1):
+        firebase_utils.save_document('students', student_id, {'attendance_score': round(attendance_percentage, 1)})
 
-    results = student.results.all().order_by('-year', 'exam_type')
+    all_res = firebase_utils.list_documents('results')
+    results = [r for r in all_res if r.get('student_id') == student_id]
+    results = sorted(results, key=lambda x: (x.get('year', ''), x.get('exam_type', '')), reverse=True)
 
     context = {
         'student': student,
@@ -130,8 +172,8 @@ def student_profile(request, student_id):
             'absent': absent_days,
             'leave': leave_days,
             'percentage': round(attendance_percentage, 1),
-            'total_late_minutes': student.total_late_minutes_last_year(),
-            'no_absences': student.no_absences_last_year()
+            'total_late_minutes': sum([int(a.get('minutes_late', 0)) for a in attendance_records]),
+            'no_absences': not any([a for a in attendance_records if a.get('status') == 'Absent'])
         }
     }
     return render(request, 'academy/profile.html', context)
@@ -147,55 +189,54 @@ def attendance(request):
     course_filter = request.GET.get('course', 'All')
     class_filter = request.GET.get('desired_class', '')
     
-    students = Student.objects.all()
+    # Fetch students from Firestore
+    students = firebase_utils.list_documents('students')
     if course_filter != 'All':
-        students = students.filter(course=course_filter)
+        students = [s for s in students if s.get('course') == course_filter]
     if class_filter:
-        students = students.filter(desired_class=class_filter)
+        students = [s for s in students if s.get('desired_class') == class_filter]
     
     if request.method == 'POST':
         for student in students:
-            status = request.POST.get(f'status_{student.student_id}')
-            minutes_late = request.POST.get(f'minutes_late_{student.student_id}', 0)
+            sid = student.get('student_id')
+            status = request.POST.get(f'status_{sid}')
+            minutes_late = request.POST.get(f'minutes_late_{sid}', 0)
             if not str(minutes_late).isdigit():
                 minutes_late = 0
             
             if status:
-                Attendance.objects.update_or_create(
-                    student=student,
-                    date=attendance_date,
-                    defaults={'status': status, 'minutes_late': int(minutes_late)}
-                )
+                # Save attendance to Firestore
+                att_id = f"{sid}_{date_str}"
+                att_data = {
+                    'student_id': sid,
+                    'date': date_str,
+                    'status': status,
+                    'minutes_late': int(minutes_late)
+                }
+                firebase_utils.save_document('attendance', att_id, att_data)
                 
-                # Check if student should be removed from Sahib Tarteeb
-                # 1. "if the student is absent he will be remove rom this list"
-                # 2. "if the students is late 60 minutes in last year remove him rom sahib tarteeb"
-                if student.is_sahib_tarteeb:
+                # Handle Sahib Tarteeb logic in Firestore
+                if student.get('is_sahib_tarteeb'):
                     if status == 'Absent':
-                        student.is_sahib_tarteeb = False
-                        student.save()
-                    else:
-                        total_late = student.total_late_minutes_last_year()
-                        if total_late >= 60:
-                            student.is_sahib_tarteeb = False
-                            student.save()
+                        firebase_utils.save_document('students', sid, {'is_sahib_tarteeb': False})
 
         messages.success(request, f"حاضری کامیابی سے محفوظ ہو گئی۔ / Attendance for {attendance_date} saved successfully.")
         return redirect(f"{request.path}?date={date_str}&course={course_filter}&desired_class={class_filter}")
 
-    # Get existing attendance for the selected date to prepopulate
-    existing_attendance = Attendance.objects.filter(date=attendance_date, student__in=students)
-    attendance_map = {att.student_id: {'status': att.status, 'minutes_late': att.minutes_late} for att in existing_attendance}
+    # Get existing attendance from Firestore
+    all_att = firebase_utils.list_documents('attendance')
+    attendance_map = {a['student_id']: a for a in all_att if a.get('date') == date_str}
     
     # Add properties to student objects for the template
     for student in students:
-        att_data = attendance_map.get(student.student_id, {'status': 'Present', 'minutes_late': 0})
-        student.current_status = att_data['status']
-        student.current_minutes_late = att_data['minutes_late']
+        att_data = attendance_map.get(student.get('student_id'), {'status': 'Present', 'minutes_late': 0})
+        student['current_status'] = att_data['status']
+        student['current_minutes_late'] = att_data['minutes_late']
 
-    # Get departments and unique classes for filters
+    # Get unique classes for filters
+    all_students = firebase_utils.list_documents('students')
+    unique_classes = sorted(list(set([s.get('desired_class') for s in all_students if s.get('desired_class')])))
     departments = [choice[0] for choice in Student.COURSE_CHOICES]
-    unique_classes = Student.objects.exclude(desired_class='').values_list('desired_class', flat=True).distinct()
 
     context = {
         'students': students,
@@ -209,7 +250,7 @@ def attendance(request):
     return render(request, 'academy/attendance.html', context)
 
 def staff_management(request):
-    staff = Staff.objects.all()
+    staff = firebase_utils.list_documents('staff')
     return render(request, 'academy/staff.html', {'staff': staff})
 
 def staff_create(request):
@@ -217,8 +258,13 @@ def staff_create(request):
     if request.method == 'POST':
         form = StaffForm(request.POST)
         if form.is_valid():
-            member = form.save()
-            messages.success(request, f"نیا عملہ رکن {member.name} بنایا گیا۔ / New staff member {member.name} created.")
+            data = form.cleaned_data
+            sid = data.get('staff_id')
+            
+            # Save to Firestore
+            firebase_utils.save_document('staff', sid, data)
+            
+            messages.success(request, f"نیا عملہ رکن {data['name']} بنایا گیا۔ / New staff member {data['name']} created.")
             return redirect('academy:staff_management')
         else:
             messages.error(request, "براہ کرم نیچے دی گئی غلطیاں درست کریں۔ / Please correct the errors below.")
@@ -227,15 +273,26 @@ def staff_create(request):
     return render(request, 'academy/staff_form.html', {'form': form})
 
 def leave_management(request):
-    leaves = LeaveRequest.objects.all().order_by('-start_date')
+    leaves = firebase_utils.list_documents('leaves')
+    leaves = sorted(leaves, key=lambda x: x.get('start_date', ''), reverse=True)
     return render(request, 'academy/leaves.html', {'leaves': leaves})
 
 def subjects_manage(request):
-    subjects = Subject.objects.all().order_by('course', 'class_name')
+    subjects = firebase_utils.list_documents('subjects')
+    # Sort subjects for display
+    subjects = sorted(subjects, key=lambda x: (x.get('course', ''), x.get('class_name', '')))
+    
     if request.method == 'POST':
         form = SubjectForm(request.POST)
         if form.is_valid():
-            form.save()
+            data = form.cleaned_data
+            # Generate a simple ID for subject
+            import uuid
+            sub_id = str(uuid.uuid4())[:8]
+            
+            # Save to Firestore
+            firebase_utils.save_document('subjects', sub_id, data)
+            
             messages.success(request, "Subject added successfully.")
             return redirect('academy:subjects_manage')
     else:
@@ -256,44 +313,68 @@ def result_bulk_entry(request):
     subjects = []
     
     if course and class_name:
-        students = Student.objects.filter(course=course, desired_class=class_name)
+        all_students = firebase_utils.list_documents('students')
+        students = [s for s in all_students if s.get('course') == course and s.get('desired_class') == class_name]
+        
+        all_subjects = firebase_utils.list_documents('subjects')
         if course == 'شعبہ کتب':
-            subjects = Subject.objects.filter(course=course, class_name=class_name)
+            subjects = [s for s in all_subjects if s.get('course') == course and s.get('class_name') == class_name]
         else:
-            # For other courses, subjects are the same for all classes
-            subjects = Subject.objects.filter(course=course)
+            subjects = [s for s in all_subjects if s.get('course') == course]
 
     if request.method == 'POST':
-        # Process bulk submission
         try:
             for student in students:
+                sid = student.get('student_id')
                 subjects_data = {}
-                for subject in subjects:
-                    field_name = f"marks_{student.student_id}_{subject.id}"
-                    marks = request.POST.get(field_name, 0)
-                    subjects_data[subject.name] = marks
+                obtained_marks = 0
+                total_marks = 0
                 
-                result, created = Result.objects.get_or_create(
-                    student=student,
-                    year=year,
-                    exam_type=exam_type,
-                    defaults={'subjects_json': subjects_data}
-                )
-                if not created:
-                    result.subjects_json = subjects_data
-                    result.save()
+                for subject in subjects:
+                    field_name = f"marks_{sid}_{subject.get('id')}"
+                    marks = request.POST.get(field_name, 0)
+                    try:
+                        m_val = int(marks)
+                        subjects_data[subject.get('name')] = m_val
+                        obtained_marks += m_val
+                        total_marks += 100 # Default per subject
+                    except: pass
+                
+                if not subjects_data: continue
+
+                # Calculate Result
+                percentage = (obtained_marks / total_marks * 100) if total_marks > 0 else 0
+                grade = 'راسب (Fail)'
+                if percentage >= 90: grade = 'ممتاز (A+)'
+                elif percentage >= 80: grade = 'بہت اچھا (A)'
+                elif percentage >= 70: grade = 'اچھا (B)'
+                elif percentage >= 60: grade = 'مقبول (C)'
+                elif percentage >= 50: grade = 'کوشش درکار (D)'
+
+                res_id = f"{sid}_{year}_{exam_type}"
+                result_data = {
+                    'student_id': sid,
+                    'year': year,
+                    'exam_type': exam_type,
+                    'subjects_json': subjects_data,
+                    'obtained_marks': obtained_marks,
+                    'total_marks': total_marks,
+                    'percentage': round(percentage, 1),
+                    'overall_grade': grade
+                }
+                firebase_utils.save_document('results', res_id, result_data)
             
             messages.success(request, "Results saved successfully.")
             return redirect(f"{request.path}?course={course}&class_name={class_name}&year={year}&exam_type={exam_type}")
         except Exception as e:
             messages.error(request, f"Error saving results: {e}")
 
-    # For the form, we need current results if any
     current_results = {}
     if students:
-        results = Result.objects.filter(student__in=students, year=year, exam_type=exam_type)
-        for r in results:
-            current_results[r.student.student_id] = r.subjects_json
+        all_res = firebase_utils.list_documents('results')
+        for r in all_res:
+            if r.get('year') == year and r.get('exam_type') == exam_type:
+                current_results[r.get('student_id')] = r.get('subjects_json')
 
     return render(request, 'academy/result_entry.html', {
         'students': students,
@@ -311,13 +392,16 @@ def result_bulk_entry(request):
     })
 
 def student_result_card(request, student_id, year, exam_type):
-    student = get_object_or_404(Student, student_id=student_id)
-    # We might need to handle URL encoding if exam_type is passed in URL
-    result = get_object_or_404(Result, student=student, year=year, exam_type=exam_type)
+    student = firebase_utils.get_document('students', student_id)
+    res_id = f"{student_id}_{year}_{exam_type}"
+    result = firebase_utils.get_document('results', res_id)
+    if not student or not result:
+        messages.error(request, "Result not found.")
+        return redirect('academy:directory')
     return render(request, 'academy/result_card.html', {
         'student': student,
         'result': result,
-        'subjects': result.subjects_json
+        'subjects': result.get('subjects_json', {})
     })
 
 def class_gazette(request):
@@ -330,33 +414,38 @@ def class_gazette(request):
     subjects_list = []
     
     if course and class_name:
-        # Get all results for this class
-        results_qs = Result.objects.filter(
-            student__course=course,
-            student__desired_class=class_name,
-            year=year,
-            exam_type=exam_type
-        ).select_related('student').order_by('-obtained_marks')
+        all_res = firebase_utils.list_documents('results')
+        all_students = firebase_utils.list_documents('students')
+        student_map = {s['student_id']: s for s in all_students}
         
-        # Determine all subjects involved
-        all_subjects = set()
-        for r in results_qs:
-            for sub_name in r.subjects_json.keys():
-                all_subjects.add(sub_name)
+        # Filter results for this class
+        class_results = []
+        for r in all_res:
+            sid = r.get('student_id')
+            student = student_map.get(sid)
+            if student and student.get('course') == course and \
+               student.get('desired_class') == class_name and \
+               r.get('year') == year and r.get('exam_type') == exam_type:
+                r['student'] = student
+                class_results.append(r)
         
-        subjects_list = sorted(list(all_subjects))
+        # Determine all subjects
+        all_subs = set()
+        for r in class_results:
+            for sub in r.get('subjects_json', {}).keys():
+                all_subs.add(sub)
+        subjects_list = sorted(list(all_subs))
         
-        # Ranking logic
+        # Ranking
+        class_results = sorted(class_results, key=lambda x: x.get('obtained_marks', 0), reverse=True)
         current_rank = 0
         last_marks = -1
-        for i, r in enumerate(results_qs):
-            if r.obtained_marks != last_marks:
+        for i, r in enumerate(class_results):
+            if r.get('obtained_marks') != last_marks:
                 current_rank = i + 1
-            r.position = current_rank
-            last_marks = r.obtained_marks
-            
-            # Helper for template to access marks by subject name
-            r.marks_list = [r.subjects_json.get(s, '-') for s in subjects_list]
+            r['position'] = current_rank
+            last_marks = r.get('obtained_marks')
+            r['marks_list'] = [r.get('subjects_json', {}).get(s, '-') for s in subjects_list]
             results.append(r)
 
     return render(request, 'academy/class_gazette.html', {
@@ -372,12 +461,16 @@ def class_gazette(request):
     })
 
 def student_transcript(request, student_id):
-    student = get_object_or_404(Student, student_id=student_id)
-    results = student.results.all().order_by('year', 'exam_type')
+    student = firebase_utils.get_document('students', student_id)
+    if not student:
+        return redirect('academy:directory')
     
-    # Calculate overall career summary
-    total_obtained = sum(r.obtained_marks for r in results)
-    total_possible = sum(r.total_marks for r in results)
+    all_res = firebase_utils.list_documents('results')
+    results = [r for r in all_res if r.get('student_id') == student_id]
+    results = sorted(results, key=lambda x: (x.get('year'), x.get('exam_type')))
+    
+    total_obtained = sum(r.get('obtained_marks', 0) for r in results)
+    total_possible = sum(r.get('total_marks', 0) for r in results)
     overall_percentage = (total_obtained / total_possible * 100) if total_possible > 0 else 0
     
     return render(request, 'academy/transcript.html', {

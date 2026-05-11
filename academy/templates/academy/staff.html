@@ -13,13 +13,13 @@
         </a>
     </div>
 
-    <div class="flex justify-between items-end mb-8">
+    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-end mb-8 gap-4">
         <div>
-            <h1 class="text-primary-dark text-3xl font-bold" data-en="Staff Roster" data-ur="عملے کی فہرست">Staff Roster</h1>
+            <h1 class="text-3xl font-bold text-primary-dark" data-en="Staff Roster" data-ur="عملے کی فہرست">Staff Roster</h1>
             <p class="text-primary-dark/60 mt-1" data-en="Manage personnel and administration roles." data-ur="عملے اور انتظامی کرداروں کا نظم کریں۔">Manage personnel and administration roles.</p>
         </div>
         <a href="{% url 'academy:staff_create' %}"
-            class="bg-primary-dark text-beige px-4 py-2 flex items-center gap-2 rounded-xl shadow hover:bg-primary-teal transition cursor-pointer">
+            class="bg-primary-dark text-beige px-4 py-2 flex items-center gap-2 rounded-xl shadow hover:bg-primary-teal transition cursor-pointer w-full sm:w-auto justify-center">
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
             </svg>

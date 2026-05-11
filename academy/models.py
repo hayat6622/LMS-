@@ -1,5 +1,6 @@
 from django.db import models
 from django.utils import timezone
+from . import firebase_utils
 
 class Student(models.Model):
     COURSE_CHOICES = [
@@ -69,6 +70,12 @@ class Student(models.Model):
             self.student_id = f'IA-{current_year}-{new_id_num:04d}'
         
         super().save(*args, **kwargs)
+        
+        # Sync to Firebase
+        try:
+            firebase_utils.sync_student_to_firebase(self)
+        except Exception:
+            pass
 
     def no_absences_last_year(self):
         last_year = timezone.now().date() - timezone.timedelta(days=365)
@@ -97,6 +104,13 @@ class Staff(models.Model):
     duration = models.CharField(max_length=100, blank=True, verbose_name='مدت')
     address = models.TextField(blank=True, verbose_name='پتہ')
 
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)
+        try:
+            firebase_utils.sync_staff_to_firebase(self)
+        except Exception:
+            pass
+
     def __str__(self):
         return f"{self.staff_id} - {self.name} ({self.role})"
 
@@ -115,6 +129,13 @@ class Attendance(models.Model):
 
     class Meta:
         unique_together = ('student', 'date')
+
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)
+        try:
+            firebase_utils.sync_attendance_to_firebase(self)
+        except Exception:
+            pass
 
     def __str__(self):
         return f"{self.student.name} - {self.date} ({self.status}) - {self.minutes_late} min late"
@@ -189,6 +210,10 @@ class Result(models.Model):
                 else: self.overall_grade = 'راسب (Fail)'
                 
         super().save(*args, **kwargs)
+        try:
+            firebase_utils.sync_result_to_firebase(self)
+        except Exception:
+            pass
 
     def __str__(self):
         return f"{self.student.name} - {self.year} - {self.exam_type} ({self.overall_grade})"
